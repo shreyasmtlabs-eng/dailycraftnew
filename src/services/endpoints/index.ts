@@ -1,0 +1,14 @@
+export const API_ENDPOINTS = {
+  SEND_OTP: '/login-with-phone',
+  VERIFY_OTP: '/verify-otp',
+  CREATE_PROFILE: '/create-profile',
+  GET_DETAILS: '/profile?profile_id=',
+  UPDATE_PROFILE: '/update-profile',
+  GET_ALL_PROFILES: '/profiles',
+  DELETE_PROFILE: '/delete-profile?id=',
+  DOWNLOAD_TEMPLATE: '/templates',
+  GET_LANGUAGE: '/templates/get-all-language',
+  HOME_SCREEN_LOAD_TEMPLATE: '/template',
+  GET_ALL_CATEGORY: '/templates/get-all-category',
+  MAKE_PRIMARY: '/profileMakePrimary',
+};

@@ -10,8 +10,30 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.2.0",
+    "@react-native-community/netinfo": "^11.4.1",
+    "@react-native-vector-icons/entypo": "^12.4.0",
+    "@react-native-vector-icons/ionicons": "^12.3.0",
+    "@react-navigation/bottom-tabs": "^7.8.11",
+    "@react-navigation/native": "^7.1.19",
+    "@react-navigation/native-stack": "^7.8.5",
+    "@react-navigation/stack": "^7.6.11",
+    "@reduxjs/toolkit": "^2.11.1",
+    "axios": "^1.13.2",
     "react": "19.0.0",
-    "react-native": "0.79.7"
+    "react-native": "0.79.7",
+    "react-native-asset": "^2.1.1",
+    "react-native-country-picker-modal": "^2.0.0",
+    "react-native-fs": "^2.20.0",
+    "react-native-gesture-handler": "^2.29.1",
+    "react-native-image-crop-picker": "^0.51.1",
+    "react-native-link": "^4.1.0",
+    "react-native-safe-area-context": "^5.6.2",
+    "react-native-screens": "^4.18.0",
+    "react-native-share": "^12.2.1",
+    "react-native-toast-message": "^2.3.3",
+    "react-redux": "^9.2.0",
+    "redux-persist": "^6.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
