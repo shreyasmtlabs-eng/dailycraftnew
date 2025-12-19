@@ -177,7 +177,7 @@ if(data?.status){
           text1: data.message || 'Profile created successfully',
         });
 
-
+ await AsyncStorage.setItem('is_register', 'true');
  navigation.navigate('MainTabs');
     } else {
       Toast.show({

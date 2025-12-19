@@ -3,11 +3,12 @@ import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-nat
 import { px, deviceWidth } from '../../utils/dimensions';
 import color from '../../constant/color';
 const Button = ({ title, onPress, disabled, loading }) => {
+   const Loading = title === 'Sending...';
   return (
     <TouchableOpacity
       style={[
         styles.button,
-        disabled && styles.disabledButton,
+        (disabled || Loading) && styles.disabledButton,
       ]}
       onPress={onPress}
       activeOpacity={disabled || loading ? 1 : 0.8}

@@ -62,6 +62,7 @@ type LoadTemplateType = {
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const flatListRef = useRef<FlatList<any> | null>(null);
+  const [networkError, setNetworkError] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [categories, setCategories] = useState<CategoryType[]>([]);
@@ -79,15 +80,28 @@ const isPremium = useSelector(
   (state: RootState) => state.membership.isPremium
 );
 
+
+const handleNetworkError = (error: any) => {
+  if (!error?.response || error.code === 'ERR_NETWORK') {
+    setNetworkError(true);
+  }
+};
+
+const clearNetworkError = () => {
+  setNetworkError(false);
+};
+
   const fetchCategories = async () => {
     try {
       const response = await adminAxios.get(API_ENDPOINTS.GET_ALL_CATEGORY);
        console.log('fetch categories>>>>>>:', response.data);
+          clearNetworkError();
       if (response.data?.status) {
         setCategories(response.data.data || []);
       }
     } catch (err) {
       console.log('Error fetching categories:', err);
+          handleNetworkError(err);
     }
   };
 
@@ -97,6 +111,7 @@ const isPremium = useSelector(
       setProfilesLoading(true);
       const response = await axiosInstance.get(API_ENDPOINTS.GET_ALL_PROFILES);
        console.log('get all profiles:>>>>>>>', response.data);
+        clearNetworkError();
       if (response.data?.status && Array.isArray(response.data.data)) {
         setAllProfiles(response.data.data);
 
@@ -112,6 +127,7 @@ const isPremium = useSelector(
       }
     } catch (err) {
       console.log('Error fetching profiles:>>>>>>>', err);
+       handleNetworkError(err);
       setAllProfiles([]);
     } finally {
       setProfilesLoading(false);
@@ -126,11 +142,15 @@ const isPremium = useSelector(
 
       const response = await axiosInstance.get(`${API_ENDPOINTS.GET_DETAILS}${id}`);
        console.log('get profiles details on homescreen>>>>>>>>:', response.data);
+
+       clearNetworkError();
       if (response.data?.status && response.data.data) {
         setProfileData(response.data.data);
       }
     } catch (err) {
       console.log('Error fetching profile details:>>>>>>', err);
+         handleNetworkError(err);
+
     }
   };
 
@@ -139,7 +159,7 @@ const fetchAllTemplates = async () => {
   try {
     const response = await axiosInstance.get(API_ENDPOINTS.DOWNLOAD_TEMPLATE);
     console.log('ALL Templates Response:>>>>>>>>', response.data);
-
+clearNetworkError();
     if (response.data?.status && Array.isArray(response.data.data)) {
       setTemplate(response.data.data);
       setRenderTemplate(response.data.data.map((t: any) => ({ ...t, image_url: t.file_path })));
@@ -149,6 +169,7 @@ const fetchAllTemplates = async () => {
     }
   } catch (err) {
     console.log('Error fetching templates:>>>>>>>', err);
+    clearNetworkError();
     setTemplate([]);
     setRenderTemplate([]);
   }
@@ -253,7 +274,8 @@ const renderTemplateItem = ({
   const isLoadingThisItem = loadingIndex === index && !item.image_url;
 
   return (
-    <View style={{ height: SCREEN_HEIGHT - 120, paddingLeft: 17,paddingRight:17 }}>
+    <View style={{ height: SCREEN_HEIGHT - 170, paddingLeft: 17,paddingRight:17
+    }}>
       <View style={styles.posterCard}>
 
         {profileData && (
@@ -282,7 +304,7 @@ const renderTemplateItem = ({
         ) : (
           <Image
             source={{ uri: item.image_url || item.file_path }}
-            style={{ width: '100%', height: '70%', borderRadius: 12 }}
+            style={{ width: '100%', height: '100%', borderRadius: 12}}
             resizeMode="contain"
           />
         )}

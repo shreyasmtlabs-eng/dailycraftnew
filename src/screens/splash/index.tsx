@@ -16,18 +16,20 @@ const SplashScreen = () => {
   useEffect(() => {
     const timer = setTimeout(async () => {
       const token = await AsyncStorage.getItem('token');
-      const isRegister = JSON.parse(
-        (await AsyncStorage.getItem('is_register')) || 'false'
-      );
+        const isRegisterStr = await AsyncStorage.getItem('is_register');
+        const isRegister = isRegisterStr === 'true';
+
+      console.log('RAW is_register value:', isRegister);
 
       console.log(' Token:>>>>>', token);
+       console.log('isRegister:', isRegister);
 
       if (token && isRegister) {
 
-        navigation.navigate('ChooseProfileType');
+        navigation.navigate('MainTabs');
       } else if (token && !isRegister) {
 
-        navigation.navigate('MainTabs');
+        navigation.navigate('ChooseProfileType');
       } else {
 
         navigation.navigate('Auth');
@@ -36,6 +38,11 @@ const SplashScreen = () => {
     return () => clearTimeout(timer);
 
   }, [navigation]);
+
+
+
+
+
 
   return (
     <View style={[styles.splashBox]}>

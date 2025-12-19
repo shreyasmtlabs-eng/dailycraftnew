@@ -34,18 +34,6 @@ export default StyleSheet.create({
   },
 
 profileImageContainer:{
-width: px(46),
-    height: px(46),
-    borderColor: color.primary,
-    borderRightWidth: px(4),
-    borderBottomWidth: px(4),
-    borderTopRightRadius: px(12),
-    borderBottomRightRadius: px(15),
-    borderTopLeftRadius: px(8),
-    borderBottomLeftRadius: px(12),
-    marginRight: px(10),
-    overflow: 'hidden',
-
 
 },
 
@@ -56,7 +44,6 @@ width: px(46),
     marginRight: px(10),
     justifyContent:'center',
     alignItems:'center',
-
 
   },
   welcomeText: {
@@ -453,6 +440,7 @@ labelFocused: {
 labelUnfocused: {
   color: color.labelunfocused,
 },
+
 
 });
 

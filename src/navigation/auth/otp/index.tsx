@@ -128,6 +128,12 @@ const OtpScreen = () => {
          await AsyncStorage.setItem('is_register', JSON.stringify(user?.is_register));
            await AsyncStorage.setItem('user_phone', mobile);
 
+const existingIsRegister = await AsyncStorage.getItem('is_register');
+if (!existingIsRegister) {
+  await AsyncStorage.setItem('is_register', String(user?.is_register));
+}
+
+
 dispatch(
     login({
       token: accessToken,
