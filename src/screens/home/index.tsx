@@ -15,6 +15,7 @@ import {
   Keyboard,
   ActivityIndicator,Alert,
 } from 'react-native';
+import {Buffer} from 'buffer';
 
 import Ionicons from '@react-native-vector-icons/ionicons';
 import styles from './styles';
@@ -91,6 +92,34 @@ const clearNetworkError = () => {
   setNetworkError(false);
 };
 
+
+const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
+  return Buffer.from(buffer).toString('base64');
+};
+
+
+const fetchAllTemplates = async () => {
+  try {
+    const response = await axiosInstance.get(API_ENDPOINTS.DOWNLOAD_TEMPLATE);
+      console.log('fetch all tempkate>>>>>:', response.data);
+
+
+    if (response.data?.status && Array.isArray(response.data.data)) {
+      setTemplate(response.data.data);
+
+      setRenderTemplate(
+        response.data.data.map((t: LoadTemplateType) => ({
+          ...t,
+          image_url: undefined,
+           description: null,
+        }))
+      );
+    }
+  } catch (err) {
+    console.log('Error fetchAllTemplates:', err);
+  }
+};
+
   const fetchCategories = async () => {
     try {
       const response = await adminAxios.get(API_ENDPOINTS.GET_ALL_CATEGORY);
@@ -155,30 +184,9 @@ const clearNetworkError = () => {
   };
 
 
-const fetchAllTemplates = async () => {
+const fetchTemplateData = async (templateId?: number, index?: number) => {
   try {
-    const response = await axiosInstance.get(API_ENDPOINTS.DOWNLOAD_TEMPLATE);
-    console.log('ALL Templates Response:>>>>>>>>', response.data);
-clearNetworkError();
-    if (response.data?.status && Array.isArray(response.data.data)) {
-      setTemplate(response.data.data);
-      setRenderTemplate(response.data.data.map((t: any) => ({ ...t, image_url: t.file_path })));
-    } else {
-      setTemplate([]);
-      setRenderTemplate([]);
-    }
-  } catch (err) {
-    console.log('Error fetching templates:>>>>>>>', err);
-    clearNetworkError();
-    setTemplate([]);
-    setRenderTemplate([]);
-  }
-};
-
-
-const fetchTemplateData = async (templateId: number, index: number) => {
-  try {
-    if (!templateId) return;
+    if (!templateId || typeof index !== 'number') return;
     if (renderTemplate[index]?.image_url) return;
 
     setLoadingIndex(index);
@@ -187,20 +195,34 @@ const fetchTemplateData = async (templateId: number, index: number) => {
     if (!profileId) return;
 
     const response = await axiosInstance.get(
-      `template?profile_id=${profileId}&template_id=${templateId}`,
+      `${API_ENDPOINTS.HOME_SCREEN_LOAD_TEMPLATE}?profile_id=${profileId}&template_id=${templateId}`,
       { responseType: 'arraybuffer' }
     );
 
-    const base64Image =
-      'data:image/png;base64,' + Buffer.from(response.data, 'binary').toString('base64');
+
+    const base64Image = arrayBufferToBase64(response.data);
+
+console.log('Base64 type:', typeof base64Image);
+console.log('Base64 preview:', base64Image);
+
+
+    const description =
+      response.headers?.['x-description'] ??
+      response.headers?.['description'] ??
+      '';
 
     setRenderTemplate(prev => {
       const copy = [...prev];
-      copy[index] = { ...copy[index], image_url: base64Image };
+      copy[index] = {
+        ...copy[index],
+        image_url: `data:image/png;base64,${base64Image}`,
+        // description,
+      };
       return copy;
     });
+
   } catch (err) {
-    console.log('Error fetching template image:', err);
+    console.log('fetchTemplateData error:', err);
   } finally {
     setLoadingIndex(null);
   }
@@ -212,106 +234,61 @@ const fetchTemplateData = async (templateId: number, index: number) => {
       setLoading(true);
       await fetchCategories();
       await fetchAllProfiles();
-         await fetchAllTemplates();
+      await fetchAllTemplates();
       const savedProfileId = await AsyncStorage.getItem('profile_id');
       if (savedProfileId) {
         await fetchProfileDetails(savedProfileId);
       }
       setLoading(false);
-    };
-    init();
-  }, []);
+      };
 
-  const handleDownload = async () => {
+    init();
+     }, []);
+
+
+
+     useEffect(() => {
+  if (Template.length === 0) return;
+
+  fetchTemplateData(Template[0].id, 0);
+}, [Template]);
+
+
+ const handleDownload = async () => {
   const currentTemplate = renderTemplate[currentIndex.current];
 
-  if (!currentTemplate) {
-    Alert.alert('Error', 'No template selected');
-    return;
-  }
-
-  const imageUrl =
-    currentTemplate.image_url || currentTemplate.file_path;
-
-  if (!imageUrl) {
+  if (!currentTemplate?.image_url) {
     Alert.alert('Error', 'Template image not available');
     return;
   }
 
-  downloadImage(imageUrl);
+  downloadImage(currentTemplate.image_url);
 };
 
 
 const handleNext = () => {
-  if (renderTemplate.length === 0) return;
+  if (Template.length === 0) return;
 
-  const nextIndex = (currentIndex.current + 1) % renderTemplate.length;
+  const nextIndex = (currentIndex.current + 1) % Template.length;
 
   try {
-    flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
+    flatListRef.current?.scrollToIndex({
+      index: nextIndex,
+      animated: true,
+    });
   } catch (err) {
     console.log('scrollToIndex error', err);
   }
 
   currentIndex.current = nextIndex;
 
-  if (!renderTemplate[nextIndex]?.image_url && renderTemplate[nextIndex]?.id) {
-    fetchTemplateData(renderTemplate[nextIndex].id, nextIndex);
+  if (!renderTemplate[nextIndex]?.image_url && Template[nextIndex]?.id) {
+    fetchTemplateData(Template[nextIndex].id, nextIndex);
   }
 };
 
 
 
-const renderTemplateItem = ({
-  item,
-  index,
-}: {
-  item: LoadTemplateType & { image_url?: string };
-  index: number;
-}) => {
-  if (!item.image_url) fetchTemplateData(item.id, index);
-
-  const isLoadingThisItem = loadingIndex === index && !item.image_url;
-
-  return (
-    <View style={{ height: SCREEN_HEIGHT - 170, paddingLeft: 17,paddingRight:17
-    }}>
-      <View style={styles.posterCard}>
-
-        {profileData && (
-           <View>
-    <View style={styles.profileImageContainer}>
-            <Image
-              source={
-                profileData.avatar
-                  ? { uri: profileData.avatar }
-                  : require('../../assets/images/shubhamicon.png')
-              }
-              style={styles.profileImg}/>
-</View>
-               <Text style={styles.userName} numberOfLines={1}>
-              {profileData.name || 'User'}
-            </Text>
-          </View>
-        )}
-
-
-        {isLoadingThisItem ? (
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <ActivityIndicator size="large" />
-            <Text style={{ marginTop: 8 }}>Loading...</Text>
-          </View>
-        ) : (
-          <Image
-            source={{ uri: item.image_url || item.file_path }}
-            style={{ width: '100%', height: '100%', borderRadius: 12}}
-            resizeMode="contain"
-          />
-        )}
-      </View>
-    </View>
-  );
-};
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -371,7 +348,7 @@ const renderTemplateItem = ({
 
                 if(text.trim()===''){
                   setRenderTemplate(
-        Template.map(t => ({ ...t, image_url: t.file_path })));
+        Template.map(t => ({ ...t, image_url: undefined })));
 
                 }else{
                   const filtered = Template.filter(t =>
@@ -381,7 +358,7 @@ const renderTemplateItem = ({
       );
 
       setRenderTemplate(
-        filtered.map(t => ({ ...t, image_url: t.file_path }))
+        filtered.map(t => ({ ...t, image_url:undefined }))
       );
     }
 
@@ -410,16 +387,9 @@ const renderTemplateItem = ({
               return (
                 <TouchableOpacity
                   onPress={() => setActiveCategory(item.id)}
-                  style={{
-                    backgroundColor: isActive ? '#FF7F32' : '#FFFFFF',
-                    paddingHorizontal: 18,
-                    height: 34,
-                    borderRadius: 20,
-                    marginRight: 8,
-                    borderWidth: isActive ? 0 : 1,
-                    borderColor: '#C5C5C5',
-                    justifyContent: 'center',
-                  }}
+                  style={{ backgroundColor: isActive ? '#FF7F32' : '#FFFFFF',
+                    paddingHorizontal: 18, height: 34, borderRadius: 20, marginRight: 8, borderWidth: isActive ? 0 : 1, borderColor: '#C5C5C5',
+                    justifyContent: 'center'}}
                 >
                   <Text style={{ color: isActive ? '#FFFFFF' : '#000000', fontSize: 12, fontWeight: '700' }}>
                     {item.category_name}
@@ -429,40 +399,49 @@ const renderTemplateItem = ({
             }}
           />
 
+         
+
 {renderTemplate.length === 0 && loading ? (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}>
     <ActivityIndicator size="large" color="#000" />
     <Text style={{ marginTop: 10, fontSize: 16 }}>Loading Template...</Text>
   </View>
 ) : (
-  <FlatList
-    ref={(r) => (flatListRef.current = r)}
-    data={renderTemplate}
-    renderItem={renderTemplateItem}
-    keyExtractor={(item, index) => item?.id?.toString() ?? index.toString()}
-    pagingEnabled
-    snapToInterval={SCREEN_HEIGHT}
-    decelerationRate="fast"
-    showsVerticalScrollIndicator={false}
-    removeClippedSubviews={false}
-    windowSize={5}
-    initialNumToRender={1}
-    maxToRenderPerBatch={1}
-    getItemLayout={(_, index) => ({ length: SCREEN_HEIGHT, offset: SCREEN_HEIGHT * index, index })}
-    onMomentumScrollEnd={(e) => {
-      const index = Math.round(e.nativeEvent.contentOffset.y / SCREEN_HEIGHT);
-      currentIndex.current = index;
-      if (!renderTemplate[index]?.image_url && renderTemplate[index]?.id) {
-        fetchTemplateData(renderTemplate[index].id, index);
-      }
-    }}
-  />
-)}
 
-{renderTemplate.length === 0 && !loading && (
-  <View style={{ alignItems: 'center', marginTop: 40 }}>
-    <Text style={{ color: '#777' }}>No templates found</Text>
-  </View>
+
+
+<FlatList
+  ref={flatListRef}
+  data={Template}
+  pagingEnabled
+  showsVerticalScrollIndicator={false}
+  renderItem={({ item, index }) => {
+    const imageUrl = renderTemplate[index]?.image_url;
+    const isLoading = loadingIndex === index && !imageUrl;
+
+    return (
+      <View style={{ height: SCREEN_HEIGHT }}>
+        {isLoading ? (
+          <ActivityIndicator size="large"/>
+        ) : imageUrl ? (
+          <Image source={{ uri: imageUrl }} style={styles.templateImage} />
+        ) : (
+          <Text>No Template Available</Text>
+        )}
+      </View>
+    );
+  }}
+  onMomentumScrollEnd={(e) => {
+    const index = Math.round(
+      e.nativeEvent.contentOffset.y / SCREEN_HEIGHT
+    );
+    currentIndex.current = index;
+
+    if (!renderTemplate[index]?.image_url) {
+      fetchTemplateData(Template[index].id, index);
+    }
+  }}
+/>
 )}
 
 
@@ -512,10 +491,6 @@ const renderTemplateItem = ({
                         setModalVisible(false);
                         await AsyncStorage.setItem('profile_id', item.id.toString());
                         await fetchProfileDetails(item.id.toString());
-
-      if (renderTemplate[currentIndex.current]?.id) {
-      fetchTemplateData(renderTemplate[currentIndex.current].id, currentIndex.current);
-  }
                       }}
                     >
                       <View style={styles.avatarBorderBox}>

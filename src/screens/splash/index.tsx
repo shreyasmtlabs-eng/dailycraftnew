@@ -19,7 +19,7 @@ const SplashScreen = () => {
         const isRegisterStr = await AsyncStorage.getItem('is_register');
         const isRegister = isRegisterStr === 'true';
 
-      console.log('RAW is_register value:', isRegister);
+      console.log('RAW is_register value:>>>>', isRegister);
 
       console.log(' Token:>>>>>', token);
        console.log('isRegister:', isRegister);
@@ -38,9 +38,6 @@ const SplashScreen = () => {
     return () => clearTimeout(timer);
 
   }, [navigation]);
-
-
-
 
 
 

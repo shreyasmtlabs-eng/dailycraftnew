@@ -11,4 +11,5 @@ export const API_ENDPOINTS = {
   HOME_SCREEN_LOAD_TEMPLATE: '/template',
   GET_ALL_CATEGORY: '/templates/get-all-category',
   MAKE_PRIMARY: '/profileMakePrimary',
+  GET_ALL_LANGUAGE: 'templates/get-all-language',
 };

@@ -5,7 +5,7 @@ interface MembershipState {
 }
 
 const initialState: MembershipState = {
-  isPremium: false,
+  isPremium: true,
 };
 
 const membershipSlice = createSlice({

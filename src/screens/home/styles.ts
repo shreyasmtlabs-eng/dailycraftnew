@@ -34,7 +34,17 @@ export default StyleSheet.create({
   },
 
 profileImageContainer:{
-
+width: px(42),
+    height: px(42),
+    borderColor: color.primary,
+    borderRightWidth: px(4),
+    borderBottomWidth: px(4),
+    borderTopRightRadius: px(12),
+    borderBottomRightRadius: px(15),
+    borderTopLeftRadius: px(8),
+    borderBottomLeftRadius: px(12),
+    marginRight: px(10),
+    overflow: 'hidden',
 },
 
   profileImg: {
@@ -383,15 +393,18 @@ width: px(48),
     color: '#666',
   },
   templateContainer: {
-    // alignItems: 'center',
-  // marginHorizontal: px(20),
+    alignItems: 'center',
+  marginHorizontal: px(20),
   },
   templateImage: {
     width: deviceWidth  - px(30),
     height: px(450),
-    borderRadius: px(12),
+    borderRadius: px(10),
     backgroundColor: '#f5f5f5',
-    marginLeft:px(5),
+    marginLeft:px(15),
+    marginRight:px(15),
+    marginTop:px(10),
+
   },
   placeholderImage: {
     // width: deviceWidth,

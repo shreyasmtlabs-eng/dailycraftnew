@@ -4,7 +4,7 @@ import {
   Text,
   TouchableOpacity,
   ImageBackground,
-  Dimensions,
+  Dimensions,Image,
 } from 'react-native';
 import Icon from '@react-native-vector-icons/ionicons';
 import styles from './styles';
@@ -62,24 +62,31 @@ if( selected === 'personal'){
       <View style={styles.cardsContainer}>
 
         <TouchableOpacity
-          style={[
-            styles.card,
-            selected === 'personal' && styles.selectedCard,
-          ]}
-          onPress={() => setSelected('personal')}
-        >
-          <View style={styles.circle}/>
-          <Text style={styles.cardTitle}>Personal</Text>
-          <Text style={styles.cardDesc}>
-            Explore creativity your way—discover and share posters you love!
-          </Text>
+  style={[
+    styles.card,
+    selected === 'personal' && styles.selectedCard,
+  ]}
+  onPress={() => setSelected('personal')}
+>
+  <View style={styles.circle}>
+    <Image
+      source={require('../../assets/images/personalicon.png')}
+      style={styles.circleImage}
+    />
+  </View>
 
-          {selected === 'personal' && (
-            <View style={styles.tickIcon}>
-              <Icon name="checkmark-circle" size={width * 0.07} color="#FF8C32"/>
-            </View>
-          )}
-        </TouchableOpacity>
+  <Text style={styles.cardTitle}>Personal</Text>
+  <Text style={styles.cardDesc}>
+    Explore creativity your way—discover and share posters you love!
+  </Text>
+
+  {selected === 'personal' && (
+    <View style={styles.tickIcon}>
+      <Icon name="checkmark-circle" size={width * 0.07} color="#FF8C32" />
+    </View>
+  )}
+</TouchableOpacity>
+
 
 
         <TouchableOpacity
@@ -90,7 +97,12 @@ if( selected === 'personal'){
           onPress={() => setSelected('business')}
 
         >
-          <View style={styles.circle}/>
+          <View style={styles.circle}>
+              <Image
+      source={require('../../assets/images/businessicon.png')}
+      style={styles.circleImage}
+    />
+  </View>
           <Text style={styles.cardTitle}>Business</Text>
           <Text style={styles.cardDesc}>
             Showcase your brand with creative posters and grow your audience!

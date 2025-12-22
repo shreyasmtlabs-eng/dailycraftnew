@@ -59,12 +59,13 @@ export default StyleSheet.create({
     justifyContent: 'space-around',
     marginTop: deviceHeight * 0.06,
     paddingHorizontal: deviceWidth * 0.05,
+
   },
 
   card: {
     width: deviceWidth * 0.4,
     height: deviceHeight * 0.28,
-    backgroundColor: color. background,
+    // backgroundColor: color. background,
     borderRadius: deviceWidth * 0.03,
     borderWidth: px(1.5),
     borderColor: color.card,
@@ -73,6 +74,7 @@ export default StyleSheet.create({
     position: 'relative',
     paddingHorizontal: deviceWidth * 0.03,
     borderStyle: 'dashed',
+
   },
 
   selectedCard: {
@@ -80,12 +82,24 @@ export default StyleSheet.create({
   },
 
   circle: {
-    width: deviceWidth * 0.22,
-    height: deviceWidth * 0.22,
-    borderRadius: deviceWidth * 0.11,
-    backgroundColor: color.card,
-    marginBottom: deviceHeight * 0.018,
+// width: deviceWidth * 0.22,
+//   height: deviceWidth * 0.22,
+//   borderRadius: deviceWidth * 0.11,
+//   backgroundColor: color.card,
+//   marginBottom: deviceHeight * 0.018,
+//   alignItems: 'center',
+//   justifyContent: 'center',
+
   },
+  circleImage: {
+  width: deviceWidth * 0.12,
+  height: deviceWidth * 0.12,
+  resizeMode: 'contain',
+  alignItems:'center',
+  marginBottom:px(10),
+  justifyContent:'center',
+},
+
 
   cardTitle: {
     fontSize: deviceWidth * 0.045,
