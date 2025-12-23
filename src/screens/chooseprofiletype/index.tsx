@@ -9,7 +9,6 @@ import {
 import Icon from '@react-native-vector-icons/ionicons';
 import styles from './styles';
 import Button from '../../component/button';
-
 import { RootStackParamList } from '../../navigation/types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 

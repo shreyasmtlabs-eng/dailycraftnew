@@ -22,12 +22,18 @@ import { RootStackParamList } from '../../navigation/types';
 import axiosInstance from '../../services/axiousinstance';
 import { API_ENDPOINTS } from '../../services/endpoints';
 import Toast from 'react-native-toast-message';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useDispatch,useSelector } from 'react-redux';
+import { RootState } from '../../redux/store';
+import { setIsRegister } from '../../redux/slice/profile';
+// import { updateUser } from '../../redux/slice/auth';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
 type BusinessProfileProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'BusinessProfile'>;
 };
 
 const BusinessProfile = ({ navigation }: BusinessProfileProps) => {
+  const userId = useSelector((state: RootState) => state.auth.user?.id);
+  const dispatch = useDispatch();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [pickerVisible, setPickerVisible] = useState(false);
   const [shopName, setShopName] = useState('');
@@ -160,8 +166,10 @@ const BusinessProfile = ({ navigation }: BusinessProfileProps) => {
               formData.append('address',address.trim());
 
 
-  const user_id = await AsyncStorage.getItem('user_id');
-    formData.append('user_id', user_id || '');
+  // const user_id = await AsyncStorage.getItem('user_id');
+    // formData.append('user_id', user_id || '');
+
+formData.append('user_id', userId || '');
 
               if(selectedImage){
                 formData.append('avatar',{
@@ -187,7 +195,16 @@ const BusinessProfile = ({ navigation }: BusinessProfileProps) => {
               text1: data.message || 'Profile created successfully',
             });
 
-  await AsyncStorage.setItem('is_register', 'true');
+  // await AsyncStorage.setItem('is_register', 'true');
+    console.log('Dispatching setIsRegister(true)');
+
+  dispatch(setIsRegister(true));
+  // dispatch(
+  //   updateUser({
+  //     is_register: true,
+  //   })
+  // );
+
             navigation.navigate('MainTabs');
                 } else {
                   Toast.show({

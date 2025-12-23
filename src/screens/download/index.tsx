@@ -18,7 +18,7 @@ import axiosInstance from '../../services/axiousinstance';
 import { API_ENDPOINTS } from '../../services/endpoints';
 import { downloadImage } from '../../component/Downloadhelper';
 
-type TemplateItem = {
+type TemplateItem = { 
   file_path: string;
   template_name?: string;
 };

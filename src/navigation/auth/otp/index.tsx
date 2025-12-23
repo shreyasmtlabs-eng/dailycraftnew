@@ -17,11 +17,12 @@ import styles from './styles';
 import Toast from 'react-native-toast-message';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import axiosInstance from '../../../services/axiousinstance';
 import { API_ENDPOINTS } from '../../../services/endpoints';
 import { AuthStackParamList } from '../../types';
 import { login } from '../../../redux/slice/auth';
+import  { useSelector } from 'react-redux';
+import { RootState } from '../../../redux/store';
 
 const { width } = Dimensions.get('window');
 
@@ -37,7 +38,10 @@ const OtpScreen = () => {
   const [loading, setLoading] = useState(false);
   const inputs = useRef<Array<TextInput | null>>([]);
 
+// const userState = useSelector((state: RootState) => state.auth);
   const otpValue = otp.join('');
+const authState = useSelector((state: RootState) => state.auth);
+
 
   useEffect(() => {
     if (backendOtp) {
@@ -124,15 +128,8 @@ const OtpScreen = () => {
       if (data?.status) {
         const { accessToken, user } = data.data;
 
-        await AsyncStorage.setItem('token', accessToken);
-         await AsyncStorage.setItem('is_register', JSON.stringify(user?.is_register));
-           await AsyncStorage.setItem('user_phone', mobile);
 
-const existingIsRegister = await AsyncStorage.getItem('is_register');
-if (!existingIsRegister) {
-  await AsyncStorage.setItem('is_register', String(user?.is_register));
-}
-
+ console.log('Before dispatch:', { token: accessToken, user });
 
 dispatch(
     login({
@@ -140,6 +137,7 @@ dispatch(
       user: user,
     })
   );
+// console.log('After dispatch, auth state:', userState);
 
         Toast.show({
           type: 'success',
@@ -179,6 +177,10 @@ dispatch(
     }
 
   };
+
+  useEffect(() => {
+  console.log('Updated auth state:', authState);
+}, [authState]);
 
   const isButtonDisabled = otpValue.length < 6 || loading;
 

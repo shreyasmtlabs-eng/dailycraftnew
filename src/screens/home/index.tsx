@@ -13,20 +13,21 @@ import {
   FlatList,
   Dimensions,
   Keyboard,
-  ActivityIndicator,Alert,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
-import {Buffer} from 'buffer';
-
+import { Buffer } from 'buffer';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import styles from './styles';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/types';
 import axiosInstance, { adminAxios } from '../../services/axiousinstance';
 import { API_ENDPOINTS } from '../../services/endpoints';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { downloadImage } from '../../component/Downloadhelper';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
+import { setActiveProfile } from '../../redux/slice/profile';
+import { useFocusEffect } from '@react-navigation/native';
 
 type HomeScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'PersonalProfile'>;
@@ -34,35 +35,22 @@ type HomeScreenProps = {
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-type CategoryType = {
-   id: string;
-   category_name: string;
-  };
-
-type ProfileItemType = {
-   id: string;
-   name?: string;
-   avatar?: string;
-   profile_type?: string
-  };
-
-type ProfileDataType = {
-   id?: string;
-    name?: string;
-    avatar?: string
-  };
-
-
-type LoadTemplateType = {
-  id: number;
-  admin_id: number;
-  template_name: string;
-  file_path: string;
-  created_at: string;
-};
+type CategoryType = { id: string; category_name: string };
+type ProfileItemType = { id: string; name?: string; avatar?: string; profile_type?: string };
+type ProfileDataType = { id?: string; name?: string; avatar?: string };
+type LoadTemplateType = { id: number; admin_id: number; template_name: string; file_path: string; created_at: string };
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const flatListRef = useRef<FlatList<any> | null>(null);
+  const currentIndex = useRef(0);
+  const dispatch = useDispatch();
+
+  const token = useSelector((state: RootState) => state.auth.token);
+  // console.log('Redux token:', token);
+  const activeProfileId = useSelector((state: RootState) => state.profile.activeProfileId);
+  // console.log('Redux activeProfileId:', activeProfileId);
+  const isPremium = useSelector((state: RootState) => state.membership.isPremium);
+
   const [networkError, setNetworkError] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -70,164 +58,131 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
   const [allProfiles, setAllProfiles] = useState<ProfileItemType[]>([]);
   const [profileData, setProfileData] = useState<ProfileDataType | null>(null);
-  const [Template,setTemplate] = useState<LoadTemplateType[]>([]);
+  const [Template, setTemplate] = useState<LoadTemplateType[]>([]);
   const [renderTemplate, setRenderTemplate] = useState<(LoadTemplateType & { image_url?: string })[]>([]);
   const [loading, setLoading] = useState(true);
   const [profilesLoading, setProfilesLoading] = useState(false);
-const [loadingIndex, setLoadingIndex] = useState<number | null>(null);
-const currentIndex = useRef(0);
+  const [loadingIndex, setLoadingIndex] = useState<number | null>(null);
 
-const isPremium = useSelector(
-  (state: RootState) => state.membership.isPremium
-);
+  const handleNetworkError = (error: any) => {
+    if (!error?.response || error.code === 'ERR_NETWORK') setNetworkError(true);
+  };
+  const clearNetworkError = () => setNetworkError(false);
 
-
-const handleNetworkError = (error: any) => {
-  if (!error?.response || error.code === 'ERR_NETWORK') {
-    setNetworkError(true);
-  }
-};
-
-const clearNetworkError = () => {
-  setNetworkError(false);
-};
-
-
-const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
-  return Buffer.from(buffer).toString('base64');
-};
-
-
-const fetchAllTemplates = async () => {
-  try {
-    const response = await axiosInstance.get(API_ENDPOINTS.DOWNLOAD_TEMPLATE);
-      console.log('fetch all tempkate>>>>>:', response.data);
-
-
-    if (response.data?.status && Array.isArray(response.data.data)) {
-      setTemplate(response.data.data);
-
-      setRenderTemplate(
-        response.data.data.map((t: LoadTemplateType) => ({
-          ...t,
-          image_url: undefined,
-           description: null,
-        }))
-      );
-    }
-  } catch (err) {
-    console.log('Error fetchAllTemplates:', err);
-  }
-};
+  const arrayBufferToBase64 = (buffer: ArrayBuffer) => Buffer.from(buffer).toString('base64');
 
   const fetchCategories = async () => {
     try {
       const response = await adminAxios.get(API_ENDPOINTS.GET_ALL_CATEGORY);
-       console.log('fetch categories>>>>>>:', response.data);
-          clearNetworkError();
-      if (response.data?.status) {
-        setCategories(response.data.data || []);
-      }
+      clearNetworkError();
+      if (response.data?.status) setCategories(response.data.data || []);
     } catch (err) {
+      handleNetworkError(err);
       console.log('Error fetching categories:', err);
-          handleNetworkError(err);
     }
   };
+
+
+const refreshTemplates =  React.useCallback(() => {
+  if (!activeProfileId || Template.length === 0) return;
+
+  currentIndex.current = 0;
+  setLoadingIndex(null);
+
+
+  setRenderTemplate(
+    Template.map(t => ({ ...t, image_url: undefined }))
+  );
+
+  fetchTemplateData(Template[0].id, 0);
+}, [activeProfileId, Template]);;
 
 
   const fetchAllProfiles = async () => {
     try {
       setProfilesLoading(true);
       const response = await axiosInstance.get(API_ENDPOINTS.GET_ALL_PROFILES);
-       console.log('get all profiles:>>>>>>>', response.data);
-        clearNetworkError();
+      clearNetworkError();
+
       if (response.data?.status && Array.isArray(response.data.data)) {
         setAllProfiles(response.data.data);
-
-
-        const savedId = await AsyncStorage.getItem('profile_id');
-        if (!savedId && response.data.data.length > 0) {
-          const firstId = response.data.data[0].id.toString();
-          await AsyncStorage.setItem('profile_id', firstId);
-          await fetchProfileDetails(firstId);
-        }
       } else {
         setAllProfiles([]);
       }
     } catch (err) {
-      console.log('Error fetching profiles:>>>>>>>', err);
-       handleNetworkError(err);
+      handleNetworkError(err);
       setAllProfiles([]);
+      console.log('Error fetching profiles:', err);
     } finally {
       setProfilesLoading(false);
     }
   };
 
 
+
+useEffect(() => {
+  if (
+    (activeProfileId === null || activeProfileId === undefined || activeProfileId === '') &&
+    allProfiles.length > 0
+  ) {
+    dispatch(setActiveProfile(allProfiles[0].id.toString()));
+  }
+}, [allProfiles, activeProfileId]);
+
+
   const fetchProfileDetails = async (profileId?: string) => {
+    const id = profileId || activeProfileId;
+    if (!id) return;
+
     try {
-      const id = profileId || (await AsyncStorage.getItem('profile_id'));
-      if (!id) return;
-
       const response = await axiosInstance.get(`${API_ENDPOINTS.GET_DETAILS}${id}`);
-       console.log('get profiles details on homescreen>>>>>>>>:', response.data);
-
-       clearNetworkError();
-      if (response.data?.status && response.data.data) {
-        setProfileData(response.data.data);
-      }
+      clearNetworkError();
+      if (response.data?.status && response.data.data) setProfileData(response.data.data);
     } catch (err) {
-      console.log('Error fetching profile details:>>>>>>', err);
-         handleNetworkError(err);
-
+      handleNetworkError(err);
+      console.log('Error fetching profile details:', err);
     }
   };
 
+  const fetchAllTemplates = async () => {
+    try {
+      const response = await axiosInstance.get(API_ENDPOINTS.DOWNLOAD_TEMPLATE);
+      if (response.data?.status && Array.isArray(response.data.data)) {
+        setTemplate(response.data.data);
+        setRenderTemplate(
+          response.data.data.map((t: LoadTemplateType) => ({ ...t, image_url: undefined }))
+        );
+      }
+    } catch (err) {
+      console.log('Error fetchAllTemplates:', err);
+    }
+  };
 
-const fetchTemplateData = async (templateId?: number, index?: number) => {
-  try {
-    if (!templateId || typeof index !== 'number') return;
-    if (renderTemplate[index]?.image_url) return;
+  const fetchTemplateData = async (templateId?: number, index?: number) => {
+    if (!templateId || typeof index !== 'number' || renderTemplate[index]?.image_url) return;
 
     setLoadingIndex(index);
+    if (!activeProfileId) return;
 
-    const profileId = await AsyncStorage.getItem('profile_id');
-    if (!profileId) return;
+    try {
+      const response = await axiosInstance.get(
+        `${API_ENDPOINTS.HOME_SCREEN_LOAD_TEMPLATE}?profile_id=${activeProfileId}&template_id=${templateId}`,
+        { responseType: 'arraybuffer' }
+      );
 
-    const response = await axiosInstance.get(
-      `${API_ENDPOINTS.HOME_SCREEN_LOAD_TEMPLATE}?profile_id=${profileId}&template_id=${templateId}`,
-      { responseType: 'arraybuffer' }
-    );
+      const base64Image = arrayBufferToBase64(response.data);
 
-
-    const base64Image = arrayBufferToBase64(response.data);
-
-console.log('Base64 type:', typeof base64Image);
-console.log('Base64 preview:', base64Image);
-
-
-    const description =
-      response.headers?.['x-description'] ??
-      response.headers?.['description'] ??
-      '';
-
-    setRenderTemplate(prev => {
-      const copy = [...prev];
-      copy[index] = {
-        ...copy[index],
-        image_url: `data:image/png;base64,${base64Image}`,
-        // description,
-      };
-      return copy;
-    });
-
-  } catch (err) {
-    console.log('fetchTemplateData error:', err);
-  } finally {
-    setLoadingIndex(null);
-  }
-};
-
+      setRenderTemplate(prev => {
+        const copy = [...prev];
+        copy[index] = { ...copy[index], image_url: `data:image/png;base64,${base64Image}` };
+        return copy;
+      });
+    } catch (err) {
+      console.log('fetchTemplateData error:', err);
+    } finally {
+      setLoadingIndex(null);
+    }
+  };
 
   useEffect(() => {
     const init = async () => {
@@ -235,70 +190,69 @@ console.log('Base64 preview:', base64Image);
       await fetchCategories();
       await fetchAllProfiles();
       await fetchAllTemplates();
-      const savedProfileId = await AsyncStorage.getItem('profile_id');
-      if (savedProfileId) {
-        await fetchProfileDetails(savedProfileId);
-      }
       setLoading(false);
-      };
-
+    };
     init();
-     }, []);
+  }, []);
+
+
+  // useEffect(() => {
+  //   if (activeProfileId)
+  //     fetchProfileDetails(activeProfileId);
+  // }, [activeProfileId]);
+
+useFocusEffect(
+  React.useCallback(() => {
+    if (!activeProfileId) return;
+    fetchProfileDetails(activeProfileId);
+    refreshTemplates();
+       fetchAllProfiles();
+  }, [activeProfileId, Template.length])
+);
 
 
 
-     useEffect(() => {
-  if (Template.length === 0) return;
+  // useEffect(() => {
+  //   if (Template.length === 0) return;
+  //   fetchTemplateData(Template[0].id, 0);
+  // }, [Template]);
 
-  fetchTemplateData(Template[0].id, 0);
-}, [Template]);
+  // useEffect(() => {
+  //   if (!activeProfileId || Template.length === 0) return;
+  //   currentIndex.current = 0;
+  //   setRenderTemplate(Template.map(t => ({ ...t, image_url: undefined })));
+  //   fetchTemplateData(Template[0].id, 0);
+  // }, [activeProfileId]);
 
+  const handleDownload = async () => {
+    const currentTemplate = renderTemplate[currentIndex.current];
+    if (!currentTemplate?.image_url) return Alert.alert('Error', 'Template image not available');
+    downloadImage(currentTemplate.image_url);
+  };
 
- const handleDownload = async () => {
-  const currentTemplate = renderTemplate[currentIndex.current];
+  const handleNext = () => {
+    if (Template.length === 0) return;
 
-  if (!currentTemplate?.image_url) {
-    Alert.alert('Error', 'Template image not available');
-    return;
-  }
+    const nextIndex = (currentIndex.current + 1) % Template.length;
 
-  downloadImage(currentTemplate.image_url);
-};
+    try {
+      flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
+    } catch (err) {
+      console.log('scrollToIndex error', err);
+    }
 
+    currentIndex.current = nextIndex;
 
-const handleNext = () => {
-  if (Template.length === 0) return;
-
-  const nextIndex = (currentIndex.current + 1) % Template.length;
-
-  try {
-    flatListRef.current?.scrollToIndex({
-      index: nextIndex,
-      animated: true,
-    });
-  } catch (err) {
-    console.log('scrollToIndex error', err);
-  }
-
-  currentIndex.current = nextIndex;
-
-  if (!renderTemplate[nextIndex]?.image_url && Template[nextIndex]?.id) {
-    fetchTemplateData(Template[nextIndex].id, nextIndex);
-  }
-};
-
-
-
+    if (!renderTemplate[nextIndex]?.image_url && Template[nextIndex]?.id) {
+      fetchTemplateData(Template[nextIndex].id, nextIndex);
+    }
+  };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ImageBackground
-        source={require('../../assets/images/homebackground.png')}
-        style={styles.backgroundImage}
-        resizeMode="cover"
-      >
-        <View style={[styles.container]}>
-
+      <ImageBackground source={require('../../assets/images/homebackground.png')} style={styles.backgroundImage} resizeMode="cover">
+        <View style={styles.container}>
+          {/* Header */}
           <View style={styles.header}>
             <View style={styles.profileSection}>
               {loading ? (
@@ -306,16 +260,11 @@ const handleNext = () => {
               ) : (
                 <View style={styles.profileImageContainer}>
                   <Image
-                    source={
-                      profileData?.avatar
-                        ? { uri: profileData.avatar }
-                        : require('../../assets/images/shubhamicon.png')
-                    }
+                    source={profileData?.avatar ? { uri: profileData.avatar } : require('../../assets/images/shubhamicon.png')}
                     style={styles.profileImg}
                   />
                 </View>
               )}
-
               <TouchableOpacity onPress={() => setModalVisible(true)}>
                 <Text style={styles.welcomeText}>Welcome Back</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -335,7 +284,7 @@ const handleNext = () => {
             </View>
           </View>
 
-
+          {/* Search */}
           <View style={styles.searchBar}>
             <Ionicons name="search" size={25} color="#252525" />
             <TextInput
@@ -343,53 +292,43 @@ const handleNext = () => {
               placeholder="Search Posts, Reels, or GIFs..."
               placeholderTextColor="#888"
               value={searchText}
-              onChangeText={(text)=>{
+              onChangeText={text => {
                 setSearchText(text);
-
-                if(text.trim()===''){
-                  setRenderTemplate(
-        Template.map(t => ({ ...t, image_url: undefined })));
-
-                }else{
-                  const filtered = Template.filter(t =>
-        t.template_name
-          ?.toLowerCase()
-          .includes(text.toLowerCase())
-      );
-
-      setRenderTemplate(
-        filtered.map(t => ({ ...t, image_url:undefined }))
-      );
-    }
-
-    currentIndex.current = 0;
-    flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
-
+                if (text.trim() === '') {
+                  setRenderTemplate(Template.map(t => ({ ...t, image_url: undefined })));
+                } else {
+                  const filtered = Template.filter(t => t.template_name?.toLowerCase().includes(text.toLowerCase()));
+                  setRenderTemplate(filtered.map(t => ({ ...t, image_url: undefined })));
                 }
-
-              }
+                currentIndex.current = 0;
+                flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+              }}
             />
-            <Image
-              source={require('../../assets/images/filtericon.png')}
-              style={{ width: 22, height: 22, tintColor: '#414141' }}
-            />
+            <Image source={require('../../assets/images/filtericon.png')} style={{ width: 22, height: 22, tintColor: '#414141' }} />
           </View>
 
-
+          {/* Categories */}
           <FlatList
             data={categories}
             horizontal
             showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item.id}
+            keyExtractor={item => item.id}
             contentContainerStyle={{ paddingHorizontal: 10, paddingVertical: 8, marginBottom: 12 }}
             renderItem={({ item }) => {
               const isActive = activeCategory === item.id;
               return (
                 <TouchableOpacity
                   onPress={() => setActiveCategory(item.id)}
-                  style={{ backgroundColor: isActive ? '#FF7F32' : '#FFFFFF',
-                    paddingHorizontal: 18, height: 34, borderRadius: 20, marginRight: 8, borderWidth: isActive ? 0 : 1, borderColor: '#C5C5C5',
-                    justifyContent: 'center'}}
+                  style={{
+                    backgroundColor: isActive ? '#FF7F32' : '#FFFFFF',
+                    paddingHorizontal: 18,
+                    height: 34,
+                    borderRadius: 20,
+                    marginRight: 8,
+                    borderWidth: isActive ? 0 : 1,
+                    borderColor: '#C5C5C5',
+                    justifyContent: 'center',
+                  }}
                 >
                   <Text style={{ color: isActive ? '#FFFFFF' : '#000000', fontSize: 12, fontWeight: '700' }}>
                     {item.category_name}
@@ -399,72 +338,52 @@ const handleNext = () => {
             }}
           />
 
-         
+          {/* Templates */}
+          {renderTemplate.length === 0 && loading ? (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}>
+              <ActivityIndicator size="large" color="#000" />
+              <Text style={{ marginTop: 10, fontSize: 16 }}>Loading Template...</Text>
+            </View>
+          ) : (
+            <FlatList
+              ref={flatListRef}
+              data={Template}
+              pagingEnabled
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item, index }) => {
+                const imageUrl = renderTemplate[index]?.image_url;
+                const isLoading = loadingIndex === index && !imageUrl;
+                return (
+                  <View style={{ height: SCREEN_HEIGHT }}>
+                    {isLoading ? <ActivityIndicator size="large" /> : imageUrl ? <Image source={{ uri: imageUrl }} style={styles.templateImage} /> : <Text>No Template Available</Text>}
+                  </View>
+                );
+              }}
+              onMomentumScrollEnd={e => {
+                const index = Math.round(e.nativeEvent.contentOffset.y / SCREEN_HEIGHT);
+                currentIndex.current = index;
+                if (!renderTemplate[index]?.image_url) fetchTemplateData(Template[index].id, index);
+              }}
+            />
+          )}
 
-{renderTemplate.length === 0 && loading ? (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}>
-    <ActivityIndicator size="large" color="#000" />
-    <Text style={{ marginTop: 10, fontSize: 16 }}>Loading Template...</Text>
-  </View>
-) : (
-
-
-
-<FlatList
-  ref={flatListRef}
-  data={Template}
-  pagingEnabled
-  showsVerticalScrollIndicator={false}
-  renderItem={({ item, index }) => {
-    const imageUrl = renderTemplate[index]?.image_url;
-    const isLoading = loadingIndex === index && !imageUrl;
-
-    return (
-      <View style={{ height: SCREEN_HEIGHT }}>
-        {isLoading ? (
-          <ActivityIndicator size="large"/>
-        ) : imageUrl ? (
-          <Image source={{ uri: imageUrl }} style={styles.templateImage} />
-        ) : (
-          <Text>No Template Available</Text>
-        )}
-      </View>
-    );
-  }}
-  onMomentumScrollEnd={(e) => {
-    const index = Math.round(
-      e.nativeEvent.contentOffset.y / SCREEN_HEIGHT
-    );
-    currentIndex.current = index;
-
-    if (!renderTemplate[index]?.image_url) {
-      fetchTemplateData(Template[index].id, index);
-    }
-  }}
-/>
-)}
-
-
-
+          {/* Fixed Actions */}
           <View style={styles.fixedActionRow}>
-              {!isPremium ? (
-                  <TouchableOpacity
-      style={[styles.downloadBtn, { backgroundColor: '#FF984F' }]}
-      onPress={() => navigation.navigate('SubscriptionModal')}
-    >
-      <Text style={styles.downloadText}>Get Membership</Text>
-    </TouchableOpacity>
-     ) : (
-            <TouchableOpacity style={styles.downloadBtn}  onPress={handleDownload}>
-              <Text style={styles.downloadText}>Download</Text>
-            </TouchableOpacity>
-     )}
+            {!isPremium ? (
+              <TouchableOpacity style={[styles.downloadBtn, { backgroundColor: '#FF984F' }]} onPress={() => navigation.navigate('SubscriptionModal')}>
+                <Text style={styles.downloadText}>Get Membership</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity style={styles.downloadBtn} onPress={handleDownload}>
+                <Text style={styles.downloadText}>Download</Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity style={styles.nextBtn} onPress={handleNext}>
               <Text style={styles.nextText}>Next</Text>
             </TouchableOpacity>
           </View>
 
-
+          {/* Profile Modal */}
           <Modal visible={isModalVisible} transparent animationType="slide">
             <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
               <View style={styles.modalOverlay} />
@@ -482,31 +401,25 @@ const handleNext = () => {
                 {profilesLoading ? (
                   <ActivityIndicator size="large" color="#000" style={{ marginVertical: 20 }} />
                 ) : allProfiles.length > 0 ? (
-                  allProfiles.map((item) => (
+                  allProfiles.map(item => (
                     <TouchableOpacity
                       key={item.id}
                       style={styles.profileCard}
                       activeOpacity={0.8}
-                      onPress={async () => {
+                      onPress={() => {
+                        dispatch(setActiveProfile(item.id.toString()));
                         setModalVisible(false);
-                        await AsyncStorage.setItem('profile_id', item.id.toString());
-                        await fetchProfileDetails(item.id.toString());
                       }}
                     >
                       <View style={styles.avatarBorderBox}>
-                        <Image
-                          source={item.avatar ? { uri: item.avatar } : require('../../assets/images/shubhamicon.png')}
-                          style={styles.profileAvatar}
-                        />
+                        <Image source={item.avatar ? { uri: item.avatar } : require('../../assets/images/shubhamicon.png')} style={styles.profileAvatar} />
                       </View>
-
                       <View style={styles.profileInfo}>
                         <Text style={styles.profileName}>{item.name || 'User'}</Text>
                         <View style={styles.profileTag}>
                           <Text style={styles.profileTagText}>{item.profile_type || 'Personal'}</Text>
                         </View>
                       </View>
-
                       <View
                         style={{
                           width: 26,
@@ -544,3 +457,5 @@ const handleNext = () => {
 };
 
 export default HomeScreen;
+
+

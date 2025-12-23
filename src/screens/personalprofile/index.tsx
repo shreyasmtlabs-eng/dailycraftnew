@@ -1,4 +1,4 @@
-import React, { useState ,useEffect} from 'react';
+import React, { useState} from 'react';
 import {
   View,
   Text,
@@ -19,13 +19,19 @@ import Button from '../../component/button';
 import ImagePicker from 'react-native-image-crop-picker';
 import { RootStackParamList } from '../../navigation/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
+import { RootState } from '../../redux/store';
+import { useDispatch,useSelector } from 'react-redux';
+import { setIsRegister } from '../../redux/slice/profile';
+// import { updateUser } from '../../redux/slice/auth';
 import axiosInstance from '../../services/axiousinstance';
 import { API_ENDPOINTS } from '../../services/endpoints';
 import Toast from 'react-native-toast-message';
 type Props = NativeStackScreenProps<RootStackParamList, 'PersonalProfile'>;
 
 const PersonalProfile: React.FC<Props> = ({ navigation }) => {
+   const userId = useSelector((state: RootState) => state.auth.user?.id);
+   const dispatch = useDispatch();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [pickerVisible, setPickerVisible] = useState(false);
   const [name, setName] = useState('');
@@ -150,8 +156,10 @@ formData.append('mobile', contact.trim());
 formData.append('bio',bio.trim());
 formData.append('profile_type','personal');
 
- const user_id = await AsyncStorage.getItem('user_id');
-    formData.append('user_id', user_id || '');
+//  const user_id = await AsyncStorage.getItem('user_id');
+//     formData.append('user_id', user_id || '');
+
+formData.append('user_id', userId || '');
 
 if(selectedImage){
   formData.append('avatar',{
@@ -177,7 +185,15 @@ if(data?.status){
           text1: data.message || 'Profile created successfully',
         });
 
- await AsyncStorage.setItem('is_register', 'true');
+//  await AsyncStorage.setItem('is_register', 'true');
+ console.log('Dispatching setIsRegister(true)');
+
+ dispatch(setIsRegister(true));
+// dispatch(
+//     updateUser({
+//       is_register: true,
+//     })
+  // );
  navigation.navigate('MainTabs');
     } else {
       Toast.show({

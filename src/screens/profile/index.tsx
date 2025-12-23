@@ -1,63 +1,60 @@
 
-import React, { useState ,useEffect} from 'react';
-import {View,Text,TouchableOpacity,Image,ScrollView,ImageBackground,SafeAreaView,ActivityIndicator} from 'react-native';
+
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  ImageBackground,
+  SafeAreaView,
+  ActivityIndicator,
+} from 'react-native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import styles from './styles';
+
 import Toast from 'react-native-toast-message';
 import { RootStackParamList } from '../../navigation/types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_ENDPOINTS } from '../../services/endpoints';
 import axiosInstance from '../../services/axiousinstance';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../redux/slice/auth';
-import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 
 type ProfileProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Profile'>;
 };
 
-
 const Profile = ({ navigation }: ProfileProps) => {
+  const [profileData, setProfileData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
 
-const [profileData, setProfileData] = useState<any>(null);
-const [loading, setLoading] = useState(true);
-const dispatch = useDispatch();
+  const isPremium = useSelector((state: RootState) => state.membership.isPremium);
+  const activeProfileId = useSelector((state: RootState) => state.profile.activeProfileId);
 
- const isPremium = useSelector(
-  (state: RootState) => state.membership.isPremium
-);
+  const fetchProfileDetails = async (profileId?: string) => {
+    try {
+      const id = profileId || activeProfileId;
+      if (!id) return;
 
+      const response = await axiosInstance.get(`${API_ENDPOINTS.GET_DETAILS}${id}`);
 
+      console.log('get profiles details on profiles:>>>>>', response.data);
 
-
-const fetchProfileDetails = async (profileId?: string) => {
-  try {
-    const id = profileId || (await AsyncStorage.getItem('profile_id'));
-    if (!id) return;
-
-    const response = await axiosInstance.get(
-      `${API_ENDPOINTS.GET_DETAILS}${id}`);
-
-        console.log('get profiles details on profiles:>>>>>', response.data);
-
-    if (response.data?.status && response.data.data) {
-      setProfileData(response.data.data);
+      if (response.data?.status && response.data.data) {
+        setProfileData(response.data.data);
+      }
+    } catch (error) {
+      console.log('Error fetching profile details:>>>>>>>', error);
+    } finally {
+      setLoading(false);
     }
+  };
 
-  } catch (error) {
-    console.log('Error fetching profile details:>>>>>>>', error);
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-
-
-
- useEffect(() => {
+  useEffect(() => {
     setLoading(true);
     fetchProfileDetails();
 
@@ -67,26 +64,19 @@ const fetchProfileDetails = async (profileId?: string) => {
     });
 
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, activeProfileId]);
 
-
-
-
-
-  const handleLogout = async() => {
-      await AsyncStorage.multiRemove(['token', 'user_id', 'profile_id', 'is_register','user_phone']);
-  dispatch(logout());
-
+  const handleLogout = () => {
+    dispatch(logout());
 
     Toast.show({
       type: 'success',
-      text1: 'succefully logout',
+      text1: 'Successfully logged out',
       position: 'top',
     });
 
     navigation.navigate('SplashScreen');
   };
-
 
   return (
     <ImageBackground
@@ -115,13 +105,9 @@ const fetchProfileDetails = async (profileId?: string) => {
                 />
 
                 <View style={styles.profileInfo}>
-                  <Text style={styles.profileName}>
-                    {profileData?.name || 'User'}
-                  </Text>
+                  <Text style={styles.profileName}>{profileData?.name || 'User'}</Text>
                   <View style={styles.roleBadge}>
-                    <Text style={styles.roleText}>
-                      {profileData?.profile_type || 'Personal'}
-                    </Text>
+                    <Text style={styles.roleText}>{profileData?.profile_type || 'Personal'}</Text>
                   </View>
                 </View>
 
@@ -149,7 +135,10 @@ const fetchProfileDetails = async (profileId?: string) => {
                   </Text>
                 </View>
               </View>
-              <TouchableOpacity style={styles.upgradeButton}  onPress={() => navigation.navigate('SubscriptionModal')}>
+              <TouchableOpacity
+                style={styles.upgradeButton}
+                onPress={() => navigation.navigate('SubscriptionModal')}
+              >
                 <Text style={styles.upgradeText}>Upgrade Now</Text>
               </TouchableOpacity>
             </View>
@@ -191,10 +180,7 @@ const fetchProfileDetails = async (profileId?: string) => {
 
               <TouchableOpacity style={styles.optionRow}>
                 <View style={styles.optionLeft}>
-                  <Image
-                    source={require('../../assets/images/faq.png')}
-                    style={styles.optionIcon}
-                  />
+                  <Image source={require('../../assets/images/faq.png')} style={styles.optionIcon} />
                   <Text style={styles.optionText}>FAQ</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color="#999" />
@@ -217,9 +203,10 @@ const fetchProfileDetails = async (profileId?: string) => {
 
               <TouchableOpacity style={styles.optionRow}>
                 <View style={styles.optionLeft}>
-                 <Image source={require('../../assets/images/whatsappicon.png')}
-                 style={styles.optionIcon}
-                 />
+                  <Image
+                    source={require('../../assets/images/whatsappicon.png')}
+                    style={styles.optionIcon}
+                  />
                   <Text style={styles.optionText}>Whatsapp Support</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color="#999" />
@@ -246,6 +233,5 @@ const fetchProfileDetails = async (profileId?: string) => {
     </ImageBackground>
   );
 };
-
 
 export default Profile;

@@ -1,48 +1,44 @@
 
+
 import React, { useEffect } from 'react';
 import { View, Image } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 import { RootStackParamList } from '../../navigation/types';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { RootState } from '../../redux/store';
 import styles from './styles';
 
-type SplashNavigationProp = NativeStackNavigationProp<RootStackParamList, 'SplashScreen'>;
+type SplashNavigationProp =
+  NativeStackNavigationProp<RootStackParamList, 'SplashScreen'>;
 
 const SplashScreen = () => {
   const navigation = useNavigation<SplashNavigationProp>();
 
+  const token = useSelector((state: RootState) => state.auth.token);
+  const isRegistered = useSelector(
+    (state: RootState) => state.profile.isRegistered
+  );
 
   useEffect(() => {
-    const timer = setTimeout(async () => {
-      const token = await AsyncStorage.getItem('token');
-        const isRegisterStr = await AsyncStorage.getItem('is_register');
-        const isRegister = isRegisterStr === 'true';
+    const timer = setTimeout(() => {
+      console.log('Token:', token);
+      console.log('isRegistered:', isRegistered);
 
-      console.log('RAW is_register value:>>>>', isRegister);
-
-      console.log(' Token:>>>>>', token);
-       console.log('isRegister:', isRegister);
-
-      if (token && isRegister) {
-
+      if (token && isRegistered) {
         navigation.navigate('MainTabs');
-      } else if (token && !isRegister) {
-
+      } else if (token && !isRegistered) {
         navigation.navigate('ChooseProfileType');
       } else {
-
         navigation.navigate('Auth');
       }
     }, 3000);
+
     return () => clearTimeout(timer);
-
-  }, [navigation]);
-
-
+  }, [token, isRegistered, navigation]);
 
   return (
-    <View style={[styles.splashBox]}>
+    <View style={styles.splashBox}>
       <View style={styles.rowBox}>
         <View style={styles.logoContainer}>
           <Image

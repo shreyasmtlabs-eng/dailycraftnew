@@ -1,7 +1,8 @@
 import axios from 'axios';
 import NetInfo from '@react-native-community/netinfo';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL, API_ADMIN_URL } from '../apiconfig';
+import { store } from '../../redux/store';
 
 
 export const axiosInstance = axios.create({
@@ -26,7 +27,8 @@ const requestInterceptor = async (config:any) => {
     return Promise.reject({ message: 'No internet connection.' });
   }
 
-  const token = await AsyncStorage.getItem('token');
+  // const token = await AsyncStorage.getItem('token');
+  const token = store.getState().auth.token;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
