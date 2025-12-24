@@ -58,7 +58,7 @@ export default StyleSheet.create({
     color: color.downloadtext,
     fontSize: deviceWidth * 0.065,
     fontWeight: '700',
-    lineHeight: deviceWidth * 0.07,
+    lineHeight: deviceWidth * 0.09,
     marginTop: deviceHeight * 0.01,
     // fontFamily:FONT.BOLD,
   },
@@ -68,7 +68,7 @@ export default StyleSheet.create({
     fontSize: deviceWidth * 0.036,
     marginTop: deviceWidth * 0.02,
     width: '90%',
-    lineHeight: deviceWidth * 0.05,
+    lineHeight: deviceWidth * 0.06,
     // fontFamily:FONT.REGULAR,
   },
 
@@ -129,7 +129,7 @@ export default StyleSheet.create({
       marginLeft: deviceWidth * 0.01,
       // lineHeight:11,
       // fontFamily:FONT.REGULAR,
-      lineHeight:px(15),
+      lineHeight:px(17),
       fontWeight:'400',
   },
 

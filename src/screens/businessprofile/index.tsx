@@ -228,6 +228,18 @@ formData.append('user_id', userId || '');
                   }
                 };
 
+
+const toTitleCase = (text: string) => {
+  return text
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -304,9 +316,9 @@ formData.append('user_id', userId || '');
                         <Text
                           style={{
                             textAlign: 'center',
-                            fontSize: 16,
+                            fontSize: 18,
                             fontWeight: '600',
-                            marginBottom: 15,
+                            marginBottom: 20,
                           }}>
                           Select Image
                         </Text>
@@ -317,8 +329,8 @@ formData.append('user_id', userId || '');
                             closePickerSheet();
                             handleCameraPick();
                           }}>
-                          <Ionicons name="camera-outline" size={22} color="#000" />
-                          <Text style={{ marginLeft: 10, fontSize: 16 }}>
+                          <Ionicons name="camera-outline" size={24} color="#000" />
+                          <Text style={{ marginLeft: 10, fontSize: 18 }}>
                             Open Camera
                           </Text>
                         </TouchableOpacity>
@@ -329,8 +341,8 @@ formData.append('user_id', userId || '');
                             closePickerSheet();
                             handleImagePick();
                           }}>
-                          <Ionicons name="images-outline" size={22} color="#000" />
-                          <Text style={{ marginLeft: 10, fontSize: 16 }}>
+                          <Ionicons name="images-outline" size={24} color="#000" />
+                          <Text style={{ marginLeft: 10, fontSize: 18 }}>
                             Choose From Gallery
                           </Text>
                         </TouchableOpacity>
@@ -338,9 +350,9 @@ formData.append('user_id', userId || '');
                         <TouchableOpacity
                           onPress={closePickerSheet}
                           style={styles.bottomSheetCancel}>
-                          <Text style={{ textAlign: 'center', fontSize: 16, fontWeight: '600' }}>
+                          {/* <Text style={{ textAlign: 'center', fontSize: 16, fontWeight: '600' }}>
                             Cancel
-                          </Text>
+                          </Text> */}
                         </TouchableOpacity>
                       </Animated.View>
                     </TouchableOpacity>
@@ -354,6 +366,8 @@ formData.append('user_id', userId || '');
               style={[styles.input, errors.shopName ? { borderColor: 'red' } : null]}
               value={shopName}
               onChangeText={text => setShopName(text.replace(/\s+/g, ' '))}
+onEndEditing={() => setShopName(toTitleCase(shopName))}
+  autoCapitalize="words"
             />
             {errors.shopName ? (
               <Text style={styles.error}>{errors.shopName}*</Text>

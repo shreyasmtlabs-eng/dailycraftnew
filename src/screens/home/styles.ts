@@ -118,6 +118,7 @@ width: px(42),
   posterImg: {
     borderRadius: px(5),
     marginTop: px(10),
+    // backgroundColor:'red',
   },
   fixedActionRow: {
   position: 'absolute',
@@ -394,7 +395,8 @@ width: px(48),
   },
   templateContainer: {
     alignItems: 'center',
-  marginHorizontal: px(20),
+  // marginHorizontal: px(10),
+
   },
   templateImage: {
     width: deviceWidth  - px(30),
@@ -405,21 +407,23 @@ width: px(48),
     marginRight:px(15),
     marginTop:px(10),
 
+
   },
   placeholderImage: {
     // width: deviceWidth,
     // height: px(200),
-    // backgroundColor: '#e0e0e0',
     justifyContent:'flex-start',
     alignItems: 'center',
-    flex:2,
+    // flex:2,
 
     // borderRadius: px(12),
   },
   templateInfo: {
-    marginTop: px(16),
-    width: deviceWidth,
-    paddingHorizontal: px(8),
+    // marginTop: px(16),
+    // width: deviceWidth,
+    // paddingHorizontal: px(8),
+    marginLeft:5,
+    marginRight:5,
   },
   templateTitle: {
     fontSize: px(20),
@@ -429,10 +433,12 @@ width: px(48),
     marginBottom: px(8),
   },
   templateDescription: {
-    fontSize: px(14),
+    fontSize: px(12),
+    marginLeft:2,
+    marginRight:2,
     color: '#666',
-    textAlign: 'center',
-    lineHeight: px(20),
+    // textAlign: 'center',
+    // lineHeight: px(20),
   },
   noTemplateContainer: {
     alignItems: 'center',

@@ -82,7 +82,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }
   };
 
-
 const refreshTemplates =  React.useCallback(() => {
   if (!activeProfileId || Template.length === 0) return;
 
@@ -196,10 +195,6 @@ useEffect(() => {
   }, []);
 
 
-  // useEffect(() => {
-  //   if (activeProfileId)
-  //     fetchProfileDetails(activeProfileId);
-  // }, [activeProfileId]);
 
 useFocusEffect(
   React.useCallback(() => {
@@ -211,18 +206,6 @@ useFocusEffect(
 );
 
 
-
-  // useEffect(() => {
-  //   if (Template.length === 0) return;
-  //   fetchTemplateData(Template[0].id, 0);
-  // }, [Template]);
-
-  // useEffect(() => {
-  //   if (!activeProfileId || Template.length === 0) return;
-  //   currentIndex.current = 0;
-  //   setRenderTemplate(Template.map(t => ({ ...t, image_url: undefined })));
-  //   fetchTemplateData(Template[0].id, 0);
-  // }, [activeProfileId]);
 
   const handleDownload = async () => {
     const currentTemplate = renderTemplate[currentIndex.current];
@@ -252,7 +235,7 @@ useFocusEffect(
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ImageBackground source={require('../../assets/images/homebackground.png')} style={styles.backgroundImage} resizeMode="cover">
         <View style={styles.container}>
-          {/* Header */}
+
           <View style={styles.header}>
             <View style={styles.profileSection}>
               {loading ? (
@@ -284,7 +267,6 @@ useFocusEffect(
             </View>
           </View>
 
-          {/* Search */}
           <View style={styles.searchBar}>
             <Ionicons name="search" size={25} color="#252525" />
             <TextInput
@@ -307,7 +289,6 @@ useFocusEffect(
             <Image source={require('../../assets/images/filtericon.png')} style={{ width: 22, height: 22, tintColor: '#414141' }} />
           </View>
 
-          {/* Categories */}
           <FlatList
             data={categories}
             horizontal
@@ -338,7 +319,7 @@ useFocusEffect(
             }}
           />
 
-          {/* Templates */}
+
           {renderTemplate.length === 0 && loading ? (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}>
               <ActivityIndicator size="large" color="#000" />
@@ -348,13 +329,14 @@ useFocusEffect(
             <FlatList
               ref={flatListRef}
               data={Template}
-              pagingEnabled
+              // pagingEnabled
               showsVerticalScrollIndicator={false}
               renderItem={({ item, index }) => {
                 const imageUrl = renderTemplate[index]?.image_url;
                 const isLoading = loadingIndex === index && !imageUrl;
                 return (
                   <View style={{ height: SCREEN_HEIGHT }}>
+                  {/* <View style={styles.templateContainer}> */}
                     {isLoading ? <ActivityIndicator size="large" /> : imageUrl ? <Image source={{ uri: imageUrl }} style={styles.templateImage} /> : <Text>No Template Available</Text>}
                   </View>
                 );
@@ -367,7 +349,6 @@ useFocusEffect(
             />
           )}
 
-          {/* Fixed Actions */}
           <View style={styles.fixedActionRow}>
             {!isPremium ? (
               <TouchableOpacity style={[styles.downloadBtn, { backgroundColor: '#FF984F' }]} onPress={() => navigation.navigate('SubscriptionModal')}>
@@ -383,7 +364,6 @@ useFocusEffect(
             </TouchableOpacity>
           </View>
 
-          {/* Profile Modal */}
           <Modal visible={isModalVisible} transparent animationType="slide">
             <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
               <View style={styles.modalOverlay} />

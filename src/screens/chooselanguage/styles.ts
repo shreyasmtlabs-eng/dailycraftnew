@@ -43,19 +43,19 @@ export default StyleSheet.create({
 
   title: {
     color: color.downloadtext,
-    fontSize: px(18),
+    fontSize: px(24),
     fontWeight: '600',
-    lineHeight: px(26),
+    lineHeight: px(27),
     marginTop: dh * 0.01,
     fontFamily:FONT.BOLD,
     marginBottom:px(17),
   },
 
   subtitle: {
-    fontSize: px(15),
+    fontSize: px(13),
     color: color.downloadtext,
     marginTop: dh * 0.02,
-    lineHeight: px(20),
+    lineHeight: px(22),
     fontFamily:FONT.REGULAR,
   },
 

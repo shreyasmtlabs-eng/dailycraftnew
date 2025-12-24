@@ -174,7 +174,7 @@ sheetBtn: {
 },
 
 sheetBtnText: {
-  fontSize: 16,
+  fontSize: 18,
 
 },
 

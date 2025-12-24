@@ -39,18 +39,19 @@ export default StyleSheet.create({
 
   title: {
     color: color.downloadtext,
-    fontSize: deviceWidth * 0.080,
+    fontSize: deviceWidth * 0.078,
     fontWeight: '500',
     lineHeight: deviceWidth * 0.08,
     marginTop: deviceHeight * 0.01,
     fontFamily:FONT.BOLD,
+    marginBottom:px(8),
   },
 
   subtitle: {
-    fontSize: deviceWidth * 0.037,
+    fontSize: deviceWidth * 0.036,
     color: color.downloadtext,
-    marginTop: deviceHeight * 0.02,
-    lineHeight: deviceWidth * 0.05,
+    marginTop: deviceHeight * 0.01,
+    lineHeight: deviceWidth * 0.06,
     fontFamily:FONT.REGULAR,
   },
 
@@ -114,6 +115,8 @@ export default StyleSheet.create({
     textAlign: 'center',
     marginTop: deviceHeight * 0.01,
     fontFamily:FONT.REGULAR,
+    lineHeight:deviceWidth * 0.05,
+    fontWeight: '300',
   },
 
   tickIcon: {

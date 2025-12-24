@@ -216,6 +216,19 @@ if(data?.status){
   }
 };
 
+const toTitleCase = (text: string) => {
+  return text
+    .replace(/[^a-zA-Z\s]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trimStart()
+    .split(' ')
+    .map(word =>
+      word ? word[0].toUpperCase() + word.slice(1) : ''
+    )
+    .join(' ');
+};
+
 
   return (
     <KeyboardAvoidingView
@@ -271,7 +284,7 @@ if(data?.status){
                     transform: [{ translateY: sheetTranslateY }],
                   }}
                 >
-                  <Text style={{ textAlign: 'center', fontSize: 16, fontWeight: '600', marginBottom: 15 }}>
+                  <Text style={{ textAlign: 'center', fontSize: 18, fontWeight: '600', marginBottom: 18 }}>
                     Select Image
                   </Text>
 
@@ -282,7 +295,7 @@ if(data?.status){
                       handleCameraPick();
                     }}
                   >
-                    <Ionicons name="camera-outline" size={22} color="#000" />
+                    <Ionicons name="camera-outline" size={24} color="#000" />
                     <Text style={styles.sheetBtnText}>Open Camera</Text>
                   </TouchableOpacity>
 
@@ -293,12 +306,12 @@ if(data?.status){
                       handleImagePick();
                     }}
                   >
-                    <Ionicons name="images-outline" size={22} color="#000" />
+                    <Ionicons name="images-outline" size={24} color="#000" />
                     <Text style={styles.sheetBtnText}>Choose From Gallery</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity onPress={closePickerSheet} style={styles.sheetCancelBtn}>
-                    <Text style={styles.sheetCancelText}>Cancel</Text>
+                    {/* <Text style={styles.sheetCancelText}>Cancel</Text> */}
                   </TouchableOpacity>
                 </Animated.View>
               </TouchableOpacity>
@@ -309,7 +322,12 @@ if(data?.status){
             <TextInput
               style={[styles.input, errors.name && { borderColor: 'red' }]}
               value={name}
-              onChangeText={t => setName(t.replace(/\s+/g, ' '))}
+              // onChangeText={t => setName(t.replace(/\s+/g, ' '))}
+                autoCapitalize="words"
+  placeholder="Enter your name"
+  onChangeText={text => setName(toTitleCase(text))}
+  onBlur={() => setName(toTitleCase(name))}
+
             />
             {!!errors.name && <Text style={styles.errorText}>{errors.name}*</Text>}
 

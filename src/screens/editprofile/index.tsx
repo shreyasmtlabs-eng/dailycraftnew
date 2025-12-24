@@ -184,7 +184,7 @@ console.log('Redux activeProfileId in EditProfile:', activeProfileId);
               style={styles.input}
               value={name}
               onChangeText={setName}
-              placeholder="Enter name"
+              placeholder="Enter Name"
               placeholderTextColor="#777"
             />
 
@@ -202,7 +202,7 @@ console.log('Redux activeProfileId in EditProfile:', activeProfileId);
               style={styles.input}
               value={contact}
               onChangeText={setContact}
-              placeholder="Enter contact"
+              placeholder="Enter Contact"
               placeholderTextColor="#777"
             />
 

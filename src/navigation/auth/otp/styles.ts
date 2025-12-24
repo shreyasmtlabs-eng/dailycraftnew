@@ -47,13 +47,14 @@ export default StyleSheet.create({
     fontWeight: '700',
     color: color.contiuetext,
     fontFamily:FONT.BOLD,
+  lineHeight: deviceWidth * 0.09,
   },
 
   subtitle: {
     fontSize: deviceWidth * 0.039,
     color: color.contiuetext,
     marginTop: deviceHeight * 0.01,
-    lineHeight: deviceWidth * 0.05,
+    lineHeight: deviceWidth * 0.06,
     fontFamily:FONT.REGULAR,
   },
 
