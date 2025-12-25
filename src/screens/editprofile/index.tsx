@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -21,6 +20,7 @@ import { API_ENDPOINTS } from '../../services/endpoints';
 import axiosInstance from '../../services/axiousinstance';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
+import Toast from 'react-native-toast-message';
 
 type EditProfileProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'EditProfile'>;
@@ -37,7 +37,7 @@ const EditProfile = ({ navigation }: EditProfileProps) => {
   const [address, setAddress] = useState('');
   const [_profiletype, setProfileType] = useState('');
 
-  const activeProfileId = useSelector((state: RootState) => state.profile.activeProfileId);
+const activeProfileId = useSelector((state: RootState) => state.profile.activeProfileId);
 console.log('Redux activeProfileId in EditProfile:', activeProfileId);
 
   const fetchProfileDetails = async (profileId?: string) => {
@@ -94,7 +94,11 @@ console.log('Redux activeProfileId in EditProfile:', activeProfileId);
       console.log('Profile ID:>>>>>>>>', profile_id);
 
       if (!profile_id) {
-        Alert.alert('Error', 'Profile not found');
+        // Alert.alert('Error', 'Profile not found');
+        Toast.show({
+         type:'error',
+         text1:'Failed to load profile',
+        });
         return;
       }
 
@@ -107,13 +111,26 @@ console.log('Redux activeProfileId in EditProfile:', activeProfileId);
       formData.append('address', address || '');
       formData.append('profile_type', _profiletype);
 
-      if (selectedImage && !selectedImage.startsWith('http')) {
-        formData.append('avatar', {
-          uri: selectedImage,
-          type: 'image/jpeg',
-          name: `avatar_${Date.now()}.jpg`,
-        } as any);
+      // if (selectedImage && !selectedImage.startsWith('http')) {
+      //   formData.append('avatar', {
+      //     uri: selectedImage,
+      //     type: 'image/jpeg',
+      //     name: `avatar_${Date.now()}.jpg`,
+      //   } as any);
+      // }
+
+       if (selectedImage) {
+        if (selectedImage.startsWith('http')) {
+          formData.append('avatar', selectedImage);
+        } else {
+          formData.append('avatar', {
+            uri: selectedImage,
+            type: 'image/jpeg',
+            name: `avatar_${Date.now()}.jpg`,
+          } as any);
+        }
       }
+
 
       setLoading(true);
 
@@ -124,7 +141,14 @@ console.log('Redux activeProfileId in EditProfile:', activeProfileId);
       console.log('Update profile api response:>>>>>>', response.data);
 
       if (response.data?.status) {
-        Alert.alert('Success', 'Profile updated successfully');
+        // Alert.alert('Success', 'Profile updated successfully');
+
+        Toast.show({
+type:'success',
+text1:'Success',
+text2:'Profile updated successfully',
+        });
+
         setProfileData({
           ...profileData,
           name,
@@ -140,7 +164,14 @@ console.log('Redux activeProfileId in EditProfile:', activeProfileId);
       }
     } catch (error) {
       console.log('Update Profile Error:', error);
-      Alert.alert('Error', 'Something went wrong');
+      // Alert.alert('Error', 'Something went wrong');
+
+      Toast.show({
+type:'error',
+text1:'Error',
+text2:'Something went wrong',
+
+      });
     } finally {
       setLoading(false);
     }

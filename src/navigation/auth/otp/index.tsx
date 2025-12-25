@@ -9,7 +9,6 @@ import {
   ImageBackground,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { useDispatch } from 'react-redux';
@@ -104,7 +103,12 @@ const authState = useSelector((state: RootState) => state.auth);
   const handleResend = () => {
     clearOtp();
     setTimer(60);
-    Alert.alert('OTP Sent', `A new OTP has been sent to +91${mobile}`);
+    // Alert.alert('OTP Sent', `A new OTP has been sent to +91${mobile}`);
+    Toast.show({
+      type:'Success',
+text1:'OTP sent',
+text2:`A new OTP has been sent to +91${mobile}`,
+    });
   };
 
   const handleVerify = async () => {

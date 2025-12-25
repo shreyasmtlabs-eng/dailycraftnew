@@ -14,7 +14,6 @@ import {
   Dimensions,
   Keyboard,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { Buffer } from 'buffer';
 import Ionicons from '@react-native-vector-icons/ionicons';
@@ -28,6 +27,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import { setActiveProfile } from '../../redux/slice/profile';
 import { useFocusEffect } from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
 
 type HomeScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'PersonalProfile'>;
@@ -35,10 +35,31 @@ type HomeScreenProps = {
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-type CategoryType = { id: string; category_name: string };
-type ProfileItemType = { id: string; name?: string; avatar?: string; profile_type?: string };
-type ProfileDataType = { id?: string; name?: string; avatar?: string };
-type LoadTemplateType = { id: number; admin_id: number; template_name: string; file_path: string; created_at: string };
+type CategoryType = {
+  id: string;
+   category_name: string
+   };
+
+type ProfileItemType = {
+   id: string;
+    name?: string;
+     avatar?: string;
+      profile_type?: string
+     };
+
+type ProfileDataType = {
+   id?: string;
+  name?: string;
+   avatar?: string
+  };
+
+type LoadTemplateType = {
+   id: number;
+    admin_id: number;
+     template_name: string;
+      file_path: string;
+       created_at: string;
+      };
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const flatListRef = useRef<FlatList<any> | null>(null);
@@ -116,6 +137,7 @@ const refreshTemplates =  React.useCallback(() => {
       setProfilesLoading(false);
     }
   };
+
 
 
 
@@ -209,7 +231,15 @@ useFocusEffect(
 
   const handleDownload = async () => {
     const currentTemplate = renderTemplate[currentIndex.current];
-    if (!currentTemplate?.image_url) return Alert.alert('Error', 'Template image not available');
+    if (!currentTemplate?.image_url) return 
+    // Alert.alert('Error', 'Template image not available');
+
+Toast.show({
+type:'error',
+text1:'Error',
+text2:'Template image not available',
+});
+
     downloadImage(currentTemplate.image_url);
   };
 
