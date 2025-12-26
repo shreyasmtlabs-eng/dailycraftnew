@@ -1,6 +1,7 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet,Dimensions } from 'react-native';
 import {deviceHeight,deviceWidth,px} from '../../utils/dimensions';
 import color from '../../constant/color';
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 export default StyleSheet.create({
 
 
@@ -396,17 +397,26 @@ width: px(48),
   templateContainer: {
     alignItems: 'center',
   // marginHorizontal: px(10),
-
+height:px(10),
   },
   templateImage: {
-    width: deviceWidth  - px(30),
-    height: px(450),
-    borderRadius: px(10),
-    backgroundColor: '#f5f5f5',
-    marginLeft:px(15),
-    marginRight:px(15),
-    marginTop:px(10),
+    // width: deviceWidth  - px(30),
+    // height: px(450),
+    // borderRadius: px(10),
+    // backgroundColor: '#f5f5f5',
+    // marginLeft:px(15),
+    // marginRight:px(15),
+    // marginTop:px(10),
 
+      width: deviceWidth - px(30),
+  height: SCREEN_HEIGHT - px(350),
+  resizeMode: 'contain',
+  borderRadius: px(10),
+  backgroundColor: '#f5f5f5',
+  // marginHorizontal: px(15),
+  marginTop: px(10),
+   marginLeft:px(15),
+    marginRight:px(15),
 
   },
   placeholderImage: {

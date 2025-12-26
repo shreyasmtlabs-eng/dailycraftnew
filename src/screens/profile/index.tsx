@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import styles from './styles';
-
+import { clearProfile } from '../../redux/slice/profile';
 import Toast from 'react-native-toast-message';
 import { RootStackParamList } from '../../navigation/types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -31,6 +31,8 @@ const Profile = ({ navigation }: ProfileProps) => {
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
+
+
 
   const isPremium = useSelector((state: RootState) => state.membership.isPremium);
   const activeProfileId = useSelector((state: RootState) => state.profile.activeProfileId);
@@ -68,6 +70,7 @@ const Profile = ({ navigation }: ProfileProps) => {
 
   const handleLogout = () => {
     dispatch(logout());
+    dispatch(clearProfile());
 
     Toast.show({
       type: 'success',
@@ -77,6 +80,10 @@ const Profile = ({ navigation }: ProfileProps) => {
 
     navigation.navigate('SplashScreen');
   };
+
+
+
+
 
   return (
     <ImageBackground

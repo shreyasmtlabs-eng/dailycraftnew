@@ -59,6 +59,7 @@ type LoadTemplateType = {
      template_name: string;
       file_path: string;
        created_at: string;
+         category_id: number;
       };
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {

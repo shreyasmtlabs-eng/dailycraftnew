@@ -22,6 +22,7 @@ import { AuthStackParamList } from '../../types';
 import { login } from '../../../redux/slice/auth';
 import  { useSelector } from 'react-redux';
 import { RootState } from '../../../redux/store';
+import { setIsRegister } from '../../../redux/slice/profile';
 
 const { width } = Dimensions.get('window');
 
@@ -141,6 +142,7 @@ dispatch(
       user: user,
     })
   );
+  dispatch(setIsRegister(user.is_register));
 // console.log('After dispatch, auth state:', userState);
 
         Toast.show({
