@@ -21,6 +21,18 @@ export const adminAxios = axios.create({
 });
 
 
+export const setAuthHeader = (token: string) => {
+  axiosInstance.defaults.headers.common.Authorization = `Bearer ${token}`;
+  adminAxios.defaults.headers.common.Authorization = `Bearer ${token}`;
+};
+
+
+export const clearAuthHeader = () => {
+  delete axiosInstance.defaults.headers.common.Authorization;
+  delete adminAxios.defaults.headers.common.Authorization;
+};
+
+
 const requestInterceptor = async (config:any) => {
   const state = await NetInfo.fetch();
   if (!state.isConnected) {

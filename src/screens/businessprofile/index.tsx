@@ -33,6 +33,7 @@ type BusinessProfileProps = {
 
 const BusinessProfile = ({ navigation }: BusinessProfileProps) => {
   const userId = useSelector((state: RootState) => state.auth.user?.id);
+  const [networkError, setNetworkError] = useState(false);
   const dispatch = useDispatch();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [pickerVisible, setPickerVisible] = useState(false);
@@ -155,6 +156,7 @@ const BusinessProfile = ({ navigation }: BusinessProfileProps) => {
     if (!validateFields()) {return;}
 
     setLoading(true);
+      setNetworkError(false);
 
     try{
       const formData = new FormData();
@@ -216,13 +218,15 @@ formData.append('user_id', userId || '');
               } catch (err: any) {
                 console.log('create profile error >>>>', err.response, err.message);
 
-
+ if (!err.response || err.code === 'ERR_NETWORK') {
+      setNetworkError(true);
+    } else {
                  Toast.show({
                       type: 'error',
                       text1: err.response?.data?.message || 'Error',
                       text2: 'Failed to create profile',
                     });
-
+                  }
                   } finally {
                     setLoading(false);
                   }
@@ -247,7 +251,40 @@ const toTitleCase = (text: string) => {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.container}>
 
+
+
           <View style={styles.header}>
+            {networkError && (
+  <View
+    style={{
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+    }}
+  >
+    <Ionicons name="wifi-outline" size={80} color="#FF8C32" />
+    <Text style={{ fontSize: 20, fontWeight: '600', marginTop: 12 }}>
+      Network Issue
+    </Text>
+    <Text
+      style={{
+        fontSize: 14,
+        color: '#777',
+        textAlign: 'center',
+        marginVertical: 10,
+      }}
+    >
+      Please check your internet connection and try again.
+    </Text>
+
+    <Button
+      title="Retry"
+      onPress={handleCreateProfile}
+    />
+  </View>
+)}
+
             <TouchableOpacity
               style={styles.backBtn}
               onPress={() => navigation.goBack()}>
@@ -255,7 +292,7 @@ const toTitleCase = (text: string) => {
             </TouchableOpacity>
             <Text style={styles.headerText}>Business Profile</Text>
           </View>
-
+{!networkError && (
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 40 }}>
@@ -307,7 +344,7 @@ const toTitleCase = (text: string) => {
                         style={{
                           backgroundColor: '#fff',
                           paddingTop: 15,
-                          paddingBottom: 30,
+                          // paddingBottom: 30,
                           paddingHorizontal: 20,
                           borderTopLeftRadius: 20,
                           borderTopRightRadius: 20,
@@ -329,8 +366,8 @@ const toTitleCase = (text: string) => {
                             closePickerSheet();
                             handleCameraPick();
                           }}>
-                          <Ionicons name="camera-outline" size={24} color="#000" />
-                          <Text style={{ marginLeft: 10, fontSize: 18 }}>
+                          <Ionicons name="camera-outline" size={26} color="#000" />
+                          <Text style={{ marginLeft: 10, fontSize: 19}}>
                             Open Camera
                           </Text>
                         </TouchableOpacity>
@@ -341,8 +378,8 @@ const toTitleCase = (text: string) => {
                             closePickerSheet();
                             handleImagePick();
                           }}>
-                          <Ionicons name="images-outline" size={24} color="#000" />
-                          <Text style={{ marginLeft: 10, fontSize: 18 }}>
+                          <Ionicons name="images-outline" size={26} color="#000" />
+                          <Text style={{ marginLeft: 10, fontSize: 19 }}>
                             Choose From Gallery
                           </Text>
                         </TouchableOpacity>
@@ -427,6 +464,8 @@ onEndEditing={() => setShopName(toTitleCase(shopName))}
             </TouchableOpacity>
 
           </ScrollView>
+          )}
+
         </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>

@@ -18,7 +18,7 @@ import axiosInstance from '../../services/axiousinstance';
 import { API_ENDPOINTS } from '../../services/endpoints';
 import { downloadImage } from '../../component/Downloadhelper';
 
-type TemplateItem = { 
+type TemplateItem = {
   file_path: string;
   template_name?: string;
 };
@@ -26,11 +26,15 @@ type TemplateItem = {
 const Download = () => {
   const [templates, setTemplates] = useState<TemplateItem[]>([]);
   const [loading, setLoading] = useState(true);
+    const [networkError, setNetworkError] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const fetchTemplates = async () => {
+       setLoading(true);
+      setNetworkError(false);
+
       try {
         const response = await axiosInstance.get(API_ENDPOINTS.DOWNLOAD_TEMPLATE);
  console.log('download Templates Response:>>>>>>', response.data);
@@ -40,7 +44,16 @@ const Download = () => {
         } else {
           setTemplates([]);
         }
-      } catch (error) {
+      } catch (error:any) {
+
+        const message = error?.message?.toLowerCase?.() ?? '';
+
+        if (message.includes('network error') || error.code === 'ERR_NETWORK') {
+          setNetworkError(true);
+        }
+
+        setTemplates([]);
+
         console.log('Error fetching templates:', error);
       } finally {
         setLoading(false);
@@ -55,6 +68,7 @@ const Download = () => {
     setShowModal(true);
   };
 
+
   return (
     <ImageBackground
       source={require('../../assets/images/homebackground.png')}
@@ -62,10 +76,6 @@ const Download = () => {
       resizeMode="cover"
     >
       <SafeAreaView style={styles.container}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 160 }}
-        >
           <View style={styles.header}>
             <Text style={styles.title}>All Downloads</Text>
             <Text style={styles.subtitle}>
@@ -73,9 +83,35 @@ const Download = () => {
             </Text>
           </View>
 
-          {loading ? (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 160 }}
+        >
+          {/* <View style={styles.header}>
+            <Text style={styles.title}>All Downloads</Text>
+            <Text style={styles.subtitle}>
+              Browse all your saved posters and download them anytime.
+            </Text>
+          </View> */}
+
+          {loading && !networkError && (
             <ActivityIndicator size="large" color="#fff" style={{ marginTop: 40 }} />
-          ) : (
+          )}
+
+             {!loading && networkError && (
+            <Text
+              style={{
+                marginTop: 40,
+                textAlign: 'center',
+                color: '#fff',
+                fontSize: 16,
+              }}
+            >
+              Please check your internet connection
+            </Text>
+          )}
+
+   {!loading && !networkError && (
             <View style={styles.gridContainer}>
               {templates.length > 0 ? (
                 templates.map((item, index) => (

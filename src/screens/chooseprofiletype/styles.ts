@@ -11,7 +11,7 @@ export default StyleSheet.create({
 
   headerBackground: {
     width: '100%',
-    height: deviceHeight * 0.32,
+    height: deviceHeight * 0.33,
   },
 
   header: {

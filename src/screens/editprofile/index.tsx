@@ -29,6 +29,7 @@ type EditProfileProps = {
 const EditProfile = ({ navigation }: EditProfileProps) => {
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [networkError, setNetworkError] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -42,6 +43,8 @@ console.log('Redux activeProfileId in EditProfile:', activeProfileId);
 
   const fetchProfileDetails = async (profileId?: string) => {
     try {
+          setLoading(true);
+      setNetworkError(false);
       const id = profileId || activeProfileId;
       if (!id) return;
 
@@ -61,8 +64,26 @@ console.log('Redux activeProfileId in EditProfile:', activeProfileId);
         setAddress(data.address || '');
         setSelectedImage(data.avatar || null);
       }
-    } catch (error) {
+    } catch (error:any) {
       console.log('Error fetching profile details:', error);
+      const msg = error?.message?.toLowerCase?.() || '';
+
+      if ( msg.includes('network') || error?.code === 'ERR_NETWORK' ||  !error?.response ) {
+
+        setNetworkError(true);
+        Toast.show({
+          type: 'error',
+          text1: 'Network Error',
+          text2: 'Please check your internet connection',
+        });
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Failed to load profile',
+        });
+      }
+
     } finally {
       setLoading(false);
     }
@@ -101,6 +122,9 @@ console.log('Redux activeProfileId in EditProfile:', activeProfileId);
         });
         return;
       }
+
+          setLoading(true);
+      setNetworkError(false);
 
       const formData = new FormData();
       formData.append('profile_id', profile_id);
@@ -162,16 +186,26 @@ text2:'Profile updated successfully',
       } else {
         Alert.alert('Error', response.data?.message || 'Update failed');
       }
-    } catch (error) {
+    } catch (error:any) {
       console.log('Update Profile Error:', error);
+       const msg = error?.message?.toLowerCase?.() || '';
       // Alert.alert('Error', 'Something went wrong');
 
-      Toast.show({
-type:'error',
-text1:'Error',
-text2:'Something went wrong',
+ if ( msg.includes('network') || error?.code === 'ERR_NETWORK' || !error?.response) {
 
-      });
+        Toast.show({
+          type: 'error',
+          text1: 'Network Error',
+          text2: 'Please check your internet connection',
+        });
+
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Something went wrong',
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -191,6 +225,14 @@ text2:'Something went wrong',
             </TouchableOpacity>
             <Text style={styles.headerText}>Edit Profile</Text>
           </View>
+
+
+          {networkError && !loading && (
+            <Text style={{ textAlign: 'center', color: '#fff', marginVertical: 20 }}>
+              Please check your internet connection
+            </Text>
+          )}
+
 
           <View style={styles.logoContainer}>
             <TouchableOpacity style={styles.logoBox} onPress={handleImagePick} activeOpacity={0.8}>

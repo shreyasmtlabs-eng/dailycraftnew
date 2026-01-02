@@ -277,7 +277,7 @@ const toTitleCase = (text: string) => {
                   style={{
                     backgroundColor: '#fff',
                     paddingTop: 15,
-                    paddingBottom: 30,
+                    // paddingBottom: 30,
                     paddingHorizontal: 20,
                     borderTopLeftRadius: 20,
                     borderTopRightRadius: 20,
@@ -295,7 +295,7 @@ const toTitleCase = (text: string) => {
                       handleCameraPick();
                     }}
                   >
-                    <Ionicons name="camera-outline" size={24} color="#000" />
+                    <Ionicons name="camera-outline" size={26} color="#000" />
                     <Text style={styles.sheetBtnText}>Open Camera</Text>
                   </TouchableOpacity>
 
@@ -306,7 +306,7 @@ const toTitleCase = (text: string) => {
                       handleImagePick();
                     }}
                   >
-                    <Ionicons name="images-outline" size={24} color="#000" />
+                    <Ionicons name="images-outline" size={26} color="#000" />
                     <Text style={styles.sheetBtnText}>Choose From Gallery</Text>
                   </TouchableOpacity>
 

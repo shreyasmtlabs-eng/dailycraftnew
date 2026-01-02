@@ -468,5 +468,3 @@ text2:'Template image not available',
 };
 
 export default HomeScreen;
-
-

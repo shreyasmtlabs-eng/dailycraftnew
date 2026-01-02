@@ -13,7 +13,7 @@ export default StyleSheet.create({
 
   headerBackground: {
     width: '100%',
-    height: dh * 0.32,
+    height: dh * 0.33,
       // marginTop:px(5),
     // marginBottom:px(20),
   },
@@ -23,6 +23,7 @@ export default StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: dw * 0.06,
     paddingTop: dh * 0.04,
+
   },
 
   backBtn: {
@@ -39,6 +40,7 @@ export default StyleSheet.create({
   banner: {
     paddingHorizontal: dw * 0.06,
     marginTop: dh * 0.01,
+    //  backgroundColor:'red',
   },
 
   title: {

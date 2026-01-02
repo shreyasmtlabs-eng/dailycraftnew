@@ -18,10 +18,11 @@ import Toast from 'react-native-toast-message';
 import { RootStackParamList } from '../../navigation/types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { API_ENDPOINTS } from '../../services/endpoints';
-import axiosInstance from '../../services/axiousinstance';
+import axiosInstance, { clearAuthHeader } from '../../services/axiousinstance';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../redux/slice/auth';
 import { RootState } from '../../redux/store';
+import { CommonActions } from '@react-navigation/native';
 
 type ProfileProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Profile'>;
@@ -30,6 +31,7 @@ type ProfileProps = {
 const Profile = ({ navigation }: ProfileProps) => {
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+    const [networkError, setNetworkError] = useState(false);
   const dispatch = useDispatch();
 
 
@@ -37,7 +39,20 @@ const Profile = ({ navigation }: ProfileProps) => {
   const isPremium = useSelector((state: RootState) => state.membership.isPremium);
   const activeProfileId = useSelector((state: RootState) => state.profile.activeProfileId);
 
+  const token = useSelector((state: RootState) => state.auth.token);
+  const profileState = useSelector((state: RootState) => state.profile);
+
+
+  useEffect(()=>{
+console.log('token on profilescreen:', token);
+console.log('profile state:', profileState);
+  },[token , profileState]);
+
+
   const fetchProfileDetails = async (profileId?: string) => {
+        setLoading(true);
+    setNetworkError(false);
+
     try {
       const id = profileId || activeProfileId;
       if (!id) return;
@@ -48,9 +63,17 @@ const Profile = ({ navigation }: ProfileProps) => {
 
       if (response.data?.status && response.data.data) {
         setProfileData(response.data.data);
+      } else {
+        setProfileData(null);
       }
-    } catch (error) {
+    } catch (error:any) {
       console.log('Error fetching profile details:>>>>>>>', error);
+       const msg = error?.message?.toLowerCase?.() || '';
+      if (msg.includes('network') || error?.code === 'ERR_NETWORK' || !error?.response) {
+        setNetworkError(true);
+      }
+      setProfileData(null);
+
     } finally {
       setLoading(false);
     }
@@ -71,6 +94,7 @@ const Profile = ({ navigation }: ProfileProps) => {
   const handleLogout = () => {
     dispatch(logout());
     dispatch(clearProfile());
+    clearAuthHeader();
 
     Toast.show({
       type: 'success',
@@ -78,7 +102,12 @@ const Profile = ({ navigation }: ProfileProps) => {
       position: 'top',
     });
 
-    navigation.navigate('SplashScreen');
+    // navigation.navigate('SplashScreen');
+    navigation.dispatch(CommonActions.reset({
+      index:0,
+routes:[{name:'Auth'}],
+    })
+  );
   };
 
 
@@ -98,8 +127,14 @@ const Profile = ({ navigation }: ProfileProps) => {
           </View>
 
           <View style={styles.profileCard}>
-            {loading ? (
+            {loading  && !networkError ? (
               <ActivityIndicator size="large" color="#ff914d" />
+            ) : networkError ?  (
+
+          <Text style={{ textAlign: 'center', color: '#fff', marginVertical: 20 }}>
+                Please check your internet connection
+              </Text>
+
             ) : (
               <>
                 <Image
@@ -128,7 +163,7 @@ const Profile = ({ navigation }: ProfileProps) => {
             )}
           </View>
 
-          {!isPremium && (
+          {!isPremium &&  !networkError && (
             <View style={styles.premiumCard}>
               <View style={styles.premiumLeft}>
                 <Image
@@ -151,6 +186,9 @@ const Profile = ({ navigation }: ProfileProps) => {
             </View>
           )}
 
+
+  {!networkError && (
+            <>
           <View style={styles.sectionOuter}>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Settings</Text>
@@ -235,6 +273,8 @@ const Profile = ({ navigation }: ProfileProps) => {
               <Text style={styles.footerText}>Log Out</Text>
             </TouchableOpacity>
           </View>
+           </>
+          )}
         </ScrollView>
       </SafeAreaView>
     </ImageBackground>
