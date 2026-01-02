@@ -104,7 +104,6 @@ const authState = useSelector((state: RootState) => state.auth);
   const handleResend = () => {
     clearOtp();
     setTimer(60);
-    // Alert.alert('OTP Sent', `A new OTP has been sent to +91${mobile}`);
     Toast.show({
       type:'success',
 text1:'OTP sent',

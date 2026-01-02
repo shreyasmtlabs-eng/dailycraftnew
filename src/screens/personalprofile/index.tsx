@@ -358,7 +358,7 @@ const toTitleCase = (text: string) => {
               style={[styles.input, styles.textlarge, errors.bio && { borderColor: 'red' }]}
               multiline
               value={bio}
-              onChangeText={t => setBio(t.replace(/\s{2,}/g, ' '))}
+              onChangeText={t => setBio(t.replace(/\s{2,}/g, ' ').slice(0 ,300))}
             />
             {!!errors.bio && <Text style={styles.errorText}>{errors.bio}*</Text>}
 

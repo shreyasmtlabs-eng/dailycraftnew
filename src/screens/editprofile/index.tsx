@@ -8,7 +8,6 @@ import {
   ScrollView,
   Image,
   ImageBackground,
-  Alert,
 } from 'react-native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import ImagePicker from 'react-native-image-crop-picker';
@@ -31,109 +30,100 @@ const EditProfile = ({ navigation }: EditProfileProps) => {
   const [loading, setLoading] = useState(true);
   const [networkError, setNetworkError] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [contact, setContact] = useState('');
   const [bio, setBio] = useState('');
   const [address, setAddress] = useState('');
-  const [_profiletype, setProfileType] = useState('');
+  const [_profiletype, setProfileType] = useState<'personal' | 'business'>(
+    'personal'
+  );
 
-const activeProfileId = useSelector((state: RootState) => state.profile.activeProfileId);
-console.log('Redux activeProfileId in EditProfile:', activeProfileId);
+  const activeProfileId = useSelector(
+    (state: RootState) => state.profile.activeProfileId
+  );
+  console.log('Redux activeProfileId in EditProfile:', activeProfileId);
 
-  const fetchProfileDetails = async (profileId?: string) => {
+
+  const isBusiness = _profiletype === 'business';
+
+  const fetchProfileDetails = async () => {
     try {
-          setLoading(true);
+      setLoading(true);
       setNetworkError(false);
-      const id = profileId || activeProfileId;
-      if (!id) return;
 
-      const response = await axiosInstance.get(`${API_ENDPOINTS.GET_DETAILS}${id}`);
+      if (!activeProfileId) return;
 
-      console.log('get details in edit screen:>>>>>', response.data);
+      const response = await axiosInstance.get(
+        `${API_ENDPOINTS.GET_DETAILS}${activeProfileId}`
+      );
 
       if (response.data?.status && response.data.data) {
         const data = response.data.data;
 
-        setProfileType(data.profile_type || '');
-        setProfileData(data);
-        setEmail(data.email || '');
+        setProfileType(data.profile_type);
         setName(data.name || '');
+        setEmail(data.email || '');
         setContact(data.mobile || '');
         setBio(data.bio || '');
         setAddress(data.address || '');
         setSelectedImage(data.avatar || null);
       }
-    } catch (error:any) {
-      console.log('Error fetching profile details:', error);
-      const msg = error?.message?.toLowerCase?.() || '';
-
-      if ( msg.includes('network') || error?.code === 'ERR_NETWORK' ||  !error?.response ) {
-
-        setNetworkError(true);
-        Toast.show({
-          type: 'error',
-          text1: 'Network Error',
-          text2: 'Please check your internet connection',
-        });
-      } else {
-        Toast.show({
-          type: 'error',
-          text1: 'Error',
-          text2: 'Failed to load profile',
-        });
-      }
-
+    } catch (error: any) {
+      setNetworkError(true);
+      Toast.show({
+        type: 'error',
+        text1: 'Network Error',
+        text2: 'Please check your internet connection',
+      });
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleImagePick = () => {
-    ImagePicker.openPicker({
-      width: 300,
-      height: 300,
-      cropping: true,
-      includeBase64: true,
-    })
-      .then(image => setSelectedImage(image.path))
-      .catch(error => {
-        if (error.code !== 'E_PICKER_CANCELLED') {
-          console.warn('Image Picker Error:', error);
-        }
-      });
   };
 
   useEffect(() => {
     fetchProfileDetails();
   }, [activeProfileId]);
 
+  const handleImagePick = () => {
+    ImagePicker.openPicker({
+      width: 300,
+      height: 300,
+      cropping: true,
+       includeBase64: true,
+    })
+      .then(image => setSelectedImage(image.path))
+       .catch(error => {
+        if (error.code !== 'E_PICKER_CANCELLED') {
+          console.warn('Image Picker Error:', error);
+        }
+      });
+
+  };
+
+    useEffect(() => {
+    fetchProfileDetails();
+  }, [activeProfileId]);
+
+
   const handleUpdateProfile = async () => {
     try {
-      const profile_id = activeProfileId;
+      if (!activeProfileId) return;
 
-      console.log('Profile ID:>>>>>>>>', profile_id);
-
-      if (!profile_id) {
-        // Alert.alert('Error', 'Profile not found');
-        Toast.show({
-         type:'error',
-         text1:'Failed to load profile',
-        });
-        return;
-      }
-
-          setLoading(true);
-      setNetworkError(false);
+      setLoading(true);
 
       const formData = new FormData();
-      formData.append('profile_id', profile_id);
+      formData.append('profile_id', activeProfileId);
       formData.append('name', name);
       formData.append('email', email);
       formData.append('mobile', contact);
       formData.append('bio', bio);
-      formData.append('address', address || '');
       formData.append('profile_type', _profiletype);
+
+      if (isBusiness) {
+        formData.append('address', address || '');
+      }
 
       // if (selectedImage && !selectedImage.startsWith('http')) {
       //   formData.append('avatar', {
@@ -143,69 +133,38 @@ console.log('Redux activeProfileId in EditProfile:', activeProfileId);
       //   } as any);
       // }
 
-       if (selectedImage) {
-        if (selectedImage.startsWith('http')) {
-          formData.append('avatar', selectedImage);
-        } else {
-          formData.append('avatar', {
-            uri: selectedImage,
-            type: 'image/jpeg',
-            name: `avatar_${Date.now()}.jpg`,
-          } as any);
-        }
-      }
+if (selectedImage) {
+  if (selectedImage.startsWith('http')) {
+    formData.append('avatar', selectedImage);
+  } else {
+    formData.append('avatar', {
+      uri: selectedImage,
+      type: 'image/jpeg',
+      name: `avatar_${Date.now()}.jpg`,
+    } as any);
+  }
+}
 
 
-      setLoading(true);
-
-      const response = await axiosInstance.post(API_ENDPOINTS.UPDATE_PROFILE, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-
-      console.log('Update profile api response:>>>>>>', response.data);
+      const response = await axiosInstance.post(
+        API_ENDPOINTS.UPDATE_PROFILE,
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+      );
 
       if (response.data?.status) {
-        // Alert.alert('Success', 'Profile updated successfully');
-
         Toast.show({
-type:'success',
-text1:'Success',
-text2:'Profile updated successfully',
-        });
-
-        setProfileData({
-          ...profileData,
-          name,
-          email,
-          mobile: contact,
-          bio,
-          address,
-          avatar: selectedImage || profileData.avatar,
-        });
-          console.log('Using activeProfileId:', activeProfileId);
-      } else {
-        Alert.alert('Error', response.data?.message || 'Update failed');
-      }
-    } catch (error:any) {
-      console.log('Update Profile Error:', error);
-       const msg = error?.message?.toLowerCase?.() || '';
-      // Alert.alert('Error', 'Something went wrong');
-
- if ( msg.includes('network') || error?.code === 'ERR_NETWORK' || !error?.response) {
-
-        Toast.show({
-          type: 'error',
-          text1: 'Network Error',
-          text2: 'Please check your internet connection',
-        });
-
-      } else {
-        Toast.show({
-          type: 'error',
-          text1: 'Error',
-          text2: 'Something went wrong',
+          type: 'success',
+          text1: 'Success',
+          text2: 'Profile updated successfully',
         });
       }
+    } catch {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Something went wrong',
+      });
     } finally {
       setLoading(false);
     }
@@ -220,23 +179,23 @@ text2:'Profile updated successfully',
       <View style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.header}>
-            <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+            <TouchableOpacity  style={styles.backBtn}  onPress={() => navigation.goBack()}>
               <Ionicons name="chevron-back" size={24} color="#000" />
             </TouchableOpacity>
             <Text style={styles.headerText}>Edit Profile</Text>
           </View>
 
 
-          {networkError && !loading && (
+      {networkError && !loading && (
             <Text style={{ textAlign: 'center', color: '#fff', marginVertical: 20 }}>
               Please check your internet connection
             </Text>
           )}
 
 
-          <View style={styles.logoContainer}>
+            <View style={styles.logoContainer}>
             <TouchableOpacity style={styles.logoBox} onPress={handleImagePick} activeOpacity={0.8}>
-              {selectedImage ? (
+             {selectedImage ? (
                 <Image source={{ uri: selectedImage }} style={styles.logoImage} />
               ) : (
                 <>
@@ -249,16 +208,22 @@ text2:'Profile updated successfully',
                 </>
               )}
             </TouchableOpacity>
-          </View>
+</View>
 
           <View style={styles.formContainer}>
-            <Text style={styles.label}>Shop/ Business Name</Text>
+
+            <Text style={styles.label}>
+              {isBusiness ? 'Shop / Business Name' : 'Enter Name'}
+            </Text>
             <TextInput
               style={styles.input}
               value={name}
               onChangeText={setName}
-              placeholder="Enter Name"
-              placeholderTextColor="#777"
+              placeholder={
+                isBusiness
+                  ? 'Enter shop / business name'
+                  : 'Enter your name'
+              }
             />
 
             <Text style={styles.label}>Enter Email</Text>
@@ -266,8 +231,9 @@ text2:'Profile updated successfully',
               style={styles.input}
               value={email}
               onChangeText={setEmail}
-              placeholder="Enter Here"
+                placeholder="Enter Here"
               placeholderTextColor="#777"
+
             />
 
             <Text style={styles.label}>Contact Number</Text>
@@ -275,8 +241,9 @@ text2:'Profile updated successfully',
               style={styles.input}
               value={contact}
               onChangeText={setContact}
-              placeholder="Enter Contact"
+                placeholder="Enter Contact"
               placeholderTextColor="#777"
+
             />
 
             <Text style={styles.label}>Describe Yourself Briefly</Text>
@@ -284,31 +251,45 @@ text2:'Profile updated successfully',
               style={[styles.input, styles.textArea]}
               value={bio}
               onChangeText={setBio}
-              placeholder="Type Here"
+               placeholder="Type Here"
               multiline
-              placeholderTextColor="#777"
+               placeholderTextColor="#777"
             />
 
-            <Text style={styles.label}>Address</Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              value={address}
-              onChangeText={setAddress}
-              placeholder="Enter Here"
+
+            {isBusiness && (
+              <>
+                <Text style={styles.label}>Address</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  value={address}
+                  onChangeText={setAddress}
+                    placeholder="Enter Here"
               placeholderTextColor="#777"
-            />
+
+                />
+              </>
+            )}
           </View>
 
           <View style={styles.bottomContainer}>
             <Button title="Continue" onPress={handleUpdateProfile} />
           </View>
 
+
           <TouchableOpacity
             style={styles.switchContainer}
-            onPress={() => navigation.navigate('PersonalProfile')}
+            onPress={() =>
+              navigation.navigate(
+                isBusiness ? 'PersonalProfile' : 'BusinessProfile'
+              )
+            }
           >
             <Text style={styles.switchText}>
-              Switch to <Text style={styles.switchHighlight}>Personal Profile</Text>
+              Switch to{' '}
+              <Text style={styles.switchHighlight}>
+                {isBusiness ? 'Personal Profile' : 'Business Profile'}
+              </Text>
             </Text>
           </TouchableOpacity>
         </ScrollView>

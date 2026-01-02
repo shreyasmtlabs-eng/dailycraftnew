@@ -2,23 +2,24 @@ import { FONT } from './../../assets/fonts/index';
 
 
 import { StyleSheet } from 'react-native';
-import { px, deviceWidth, deviceHeight } from '../../utils/dimensions';
+import { px, deviceWidth } from '../../utils/dimensions';
 import color from '../../constant/color';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-
   },
   backgroundImage: {
-    width: deviceWidth,
-    height: deviceHeight,
-    borderRadius: px(8),
+    // width: deviceWidth,
+    // height: deviceHeight,
+    // borderRadius: px(8),
+      flex: 1,
   },
   contentContainer: {
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: px(10),
+    // justifyContent: 'center',
+    //  justifyContent: 'flex-start',
+    // padding: px(10),
   },
   header: {
     alignItems: 'center',
@@ -26,7 +27,7 @@ const styles = StyleSheet.create({
     marginBottom: px(20),
   },
   title: {
-    fontSize: px(28),
+    fontSize: px(25),
     fontWeight: '300',
     textAlign: 'center',
     lineHeight: px(35),
@@ -43,20 +44,25 @@ const styles = StyleSheet.create({
      fontFamily:FONT. REGULAR,
   },
   imageWrapper: {
-    borderRadius: px(15),
-    overflow: 'hidden',
+//     borderRadius: px(15),
+//     // overflow: 'hidden',
+// // backgroundColor:'red',
+// marginBottom:1,
+// height:px(470),
 
-
-
+  width: deviceWidth,
+  height: px(470),
+  overflow: 'hidden',
+  alignItems: 'center',
   },
   posterImage: {
     marginTop: px(20),
-    width: px(410),
+    // width: px(410),
+     width: deviceWidth - px(40),
     height: px(420),
     borderRadius: px(15),
     marginLeft: px(20),
     marginRight: px(20),
-
   },
   buttonRow: {
     flexDirection: 'row',

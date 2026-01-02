@@ -104,7 +104,6 @@ width: px(42),
     justifyContent: 'space-between',
     marginBottom: px(10),
        marginLeft: px(18),
-
        borderRadius: px(6),
        gap:px(5),
   },
@@ -175,15 +174,18 @@ width: px(42),
     height: px(80),
     borderRadius: px(50),
     backgroundColor: color.secondary,
+      // backgroundColor:'red',
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
     borderTopWidth: 1,
     borderTopColor: color.borderTopColor,
-    marginBottom: px(10),
+    marginBottom: px(5),
   },
   navItem: {
     alignItems: 'center',
+
+
   },
   iconWrapper: {
     backgroundColor: color.contiuetext,
@@ -223,11 +225,13 @@ width: px(42),
     width: px(32),
     height: px(32),
     marginBottom: px(2),
+
   },
   navLabel: {
     fontSize: px(12),
     marginTop: px(3),
     fontWeight: '700',
+
   },
   download: {
     width: px(30),

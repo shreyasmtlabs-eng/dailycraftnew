@@ -13,7 +13,7 @@ import styles from '../../../screens/home/styles';
 const Tab = createBottomTabNavigator();
 
 const icons: Record<string, any> = {
-  Home: require('../../../assets/images/Homeicon.png'),
+  Home: require('../../../assets/images/Homeicons.png'),
   Recommended: require('../../../assets/images/recommendicon.png'),
   Downloads: require('../../../assets/images/DownLoad.png'),
   Profile: require('../../../assets/images/Profileicon.png'),

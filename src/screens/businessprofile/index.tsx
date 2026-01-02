@@ -435,7 +435,7 @@ onEndEditing={() => setShopName(toTitleCase(shopName))}
               style={[styles.input, styles.textlarge, errors.bio ? { borderColor: 'red' } : null]}
               multiline
               value={bio}
-              onChangeText={text => setBio(text.replace(/\s{2,}/g, ' '))}
+              onChangeText={text => setBio(text.replace(/\s{2,}/g, ' ').slice(0, 300))}
             />
             {errors.bio ? <Text style={styles.error}>{errors.bio}*</Text> : null}
 
