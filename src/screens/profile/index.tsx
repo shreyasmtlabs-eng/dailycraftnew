@@ -8,7 +8,7 @@ import {
   ScrollView,
   ImageBackground,
   SafeAreaView,
-  ActivityIndicator,
+  ActivityIndicator,Alert,
 } from 'react-native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import styles from './styles';
@@ -22,6 +22,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../redux/slice/auth';
 import { RootState } from '../../redux/store';
 import { CommonActions } from '@react-navigation/native';
+import { setActiveProfile } from '../../redux/slice/profile';
 
 type ProfileProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Profile'>;
@@ -77,6 +78,87 @@ console.log('profile state:', profileState);
       setLoading(false);
     }
   };
+
+
+
+const handleDelete = () => {
+  if (!activeProfileId) return;
+
+  Alert.alert(
+    'Delete Profile',
+
+   'Are you sure you want to delete this profile?',
+
+    [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: confirmDeleteProfile,
+      },
+    ],
+
+  );
+
+};
+
+const confirmDeleteProfile = async () => {
+
+  try {
+    setLoading(true);
+
+    const response = await axiosInstance.delete(
+      `${API_ENDPOINTS.DELETE_PROFILE}${activeProfileId}`
+    );
+
+    if (response.data?.status) {
+
+      Toast.show({
+        type: 'success',
+        text1: 'Profile deleted successfully',
+      });
+
+
+      const profilesRes = await axiosInstance.get(API_ENDPOINTS.GET_ALL_PROFILES);
+      const profiles = profilesRes.data?.data || [];
+
+      if (profiles.length > 0) {
+        dispatch(setActiveProfile(profiles[0].id));
+      } else {
+        dispatch(clearProfile());
+      }
+
+
+      // dispatch(clearProfile());
+
+   navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'Home' }],
+
+        })
+
+      );
+    } else {
+      throw new Error('Delete failed');
+    }
+
+  } catch (error) {
+    console.log('Delete profile error:', error);
+
+    Toast.show({
+      type: 'error',
+      text1: 'Failed to delete profile',
+    });
+
+  } finally {
+    setLoading(false);
+  }
+
+};
+
+
+
 
   useEffect(() => {
     setLoading(true);
@@ -205,7 +287,7 @@ routes:[{name:'Auth'}],
 
               <View style={styles.divider} />
 
-              <TouchableOpacity style={styles.optionRow}>
+              <TouchableOpacity style={styles.optionRow} onPress={handleDelete}>
                 <View style={styles.optionLeft}>
                   <Image
                     source={require('../../assets/images/accdelete.png')}

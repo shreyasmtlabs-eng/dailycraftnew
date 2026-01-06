@@ -1,5 +1,6 @@
 
 import React, { useRef, useState } from 'react';
+import RNFS from 'react-native-fs';
 import {
   View,
   Text,
@@ -8,7 +9,11 @@ import {
   SafeAreaView,
   ImageBackground,
   FlatList,
+  Platform,
+  PermissionsAndroid,
+  Alert,
 } from 'react-native';
+import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import styles from './styles';
 import { downloadImage } from '../../component/Downloadhelper';
 
@@ -22,14 +27,61 @@ const Recommend = () => {
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-
   const handleDownload = async () => {
-    const source = Image.resolveAssetSource(images[currentIndex]);
-    if (source?.uri) {
-   await downloadImage(source.uri);
+    console.log('handleDownload clicked');
+    try {
+      const source = Image.resolveAssetSource(images[currentIndex]);
+      if (!source?.uri) return;
 
+
+      if (source.uri.startsWith('http')) {
+        await downloadImage(source.uri);
+        return;
+      }
+
+
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          {
+            title: 'Storage Permission Required',
+            message: 'App needs access to your storage to download the image',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          }
+        );
+        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+          Alert.alert('Permission denied', 'Cannot save image without storage permission');
+          return;
+        }
+      }
+
+      const filename = `image_${currentIndex}.jpg`;
+      const destPath = `${RNFS.CachesDirectoryPath}/${filename}`;
+
+
+      if (Platform.OS === 'android') {
+  console.log('Asset URI:', source.uri);
+        await RNFS.copyFileAssets(source.uri.replace('asset:/', ''), destPath);
+
+      } else {
+
+        await RNFS.copyFile(source.uri.replace('file://', ''), destPath);
+      }
+
+
+      await CameraRoll.save(destPath, { type: 'photo' });
+
+      Alert.alert('Success', 'Image downloaded to gallery!');
+      console.log('Downloaded to gallery:>>>>>', destPath);
+
+    } catch (error) {
+      console.log('Recommend download failed:', error);
+      Alert.alert('Error', 'Failed to download image');
     }
   };
+
 
   const handleNext = () => {
     if (currentIndex < images.length - 1) {
@@ -83,7 +135,6 @@ const Recommend = () => {
               }}
             />
           </View>
-
 
           <View style={styles.buttonRow}>
             <TouchableOpacity

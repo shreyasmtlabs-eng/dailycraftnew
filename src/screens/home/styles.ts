@@ -391,17 +391,17 @@ width: px(48),
   loadingContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: px(40),
+    // padding: px(40),
   },
   loadingText: {
-    marginTop: px(12),
+    // marginTop: px(12),
     fontSize: px(16),
     color: '#666',
   },
   templateContainer: {
     alignItems: 'center',
   // marginHorizontal: px(10),
-height:px(10),
+// height:px(10),
   },
   templateImage: {
     // width: deviceWidth  - px(30),
@@ -421,6 +421,7 @@ height:px(10),
   marginTop: px(10),
    marginLeft:px(15),
     marginRight:px(15),
+    marginBottom:px(2),
 
   },
   placeholderImage: {

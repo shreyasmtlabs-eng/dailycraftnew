@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -37,30 +37,30 @@ const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 type CategoryType = {
   id: string;
-   category_name: string
-   };
+  category_name: string;
+};
 
 type ProfileItemType = {
-   id: string;
-    name?: string;
-     avatar?: string;
-      profile_type?: string
-     };
+  id: string;
+  name?: string;
+  avatar?: string;
+  profile_type?: string;
+};
 
 type ProfileDataType = {
-   id?: string;
+  id?: string;
   name?: string;
-   avatar?: string
-  };
+  avatar?: string;
+};
 
 type LoadTemplateType = {
-   id: number;
-    admin_id: number;
-     template_name: string;
-      file_path: string;
-       created_at: string;
-         category_id: number;
-      };
+  id: number;
+  admin_id: number;
+  template_name: string;
+  file_path: string;
+  created_at: string;
+  category_id: number;
+};
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const flatListRef = useRef<FlatList<any> | null>(null);
@@ -68,9 +68,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const dispatch = useDispatch();
 
   const token = useSelector((state: RootState) => state.auth.token);
-  // console.log('Redux token:', token);
   const activeProfileId = useSelector((state: RootState) => state.profile.activeProfileId);
-  // console.log('Redux activeProfileId:', activeProfileId);
   const isPremium = useSelector((state: RootState) => state.membership.isPremium);
 
   const [networkError, setNetworkError] = useState(false);
@@ -85,6 +83,25 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [profilesLoading, setProfilesLoading] = useState(false);
   const [loadingIndex, setLoadingIndex] = useState<number | null>(null);
+
+
+  const filteredTemplates = useMemo(() => {
+    let result = [...Template];
+
+    if (searchText.trim() !== '') {
+      result = result.filter(t =>
+        t.template_name?.toLowerCase().includes(searchText.toLowerCase())
+      );
+    }
+
+    if (activeCategory) {
+      result = result.filter(t =>
+        t.category_id?.toString() === activeCategory
+      );
+    }
+
+    return result;
+  }, [Template, searchText, activeCategory]);
 
   const handleNetworkError = (error: any) => {
     if (!error?.response || error.code === 'ERR_NETWORK') setNetworkError(true);
@@ -103,21 +120,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       console.log('Error fetching categories:', err);
     }
   };
-
-const refreshTemplates =  React.useCallback(() => {
-  if (!activeProfileId || Template.length === 0) return;
-
-  currentIndex.current = 0;
-  setLoadingIndex(null);
-
-
-  setRenderTemplate(
-    Template.map(t => ({ ...t, image_url: undefined }))
-  );
-
-  fetchTemplateData(Template[0].id, 0);
-}, [activeProfileId, Template]);;
-
 
   const fetchAllProfiles = async () => {
     try {
@@ -139,18 +141,14 @@ const refreshTemplates =  React.useCallback(() => {
     }
   };
 
-
-
-
-useEffect(() => {
-  if (
-    (activeProfileId === null || activeProfileId === undefined || activeProfileId === '') &&
-    allProfiles.length > 0
-  ) {
-    dispatch(setActiveProfile(allProfiles[0].id.toString()));
-  }
-}, [allProfiles, activeProfileId]);
-
+  useEffect(() => {
+    if (
+      (activeProfileId === null || activeProfileId === undefined || activeProfileId === '') &&
+      allProfiles.length > 0
+    ) {
+      dispatch(setActiveProfile(allProfiles[0].id.toString()));
+    }
+  }, [allProfiles, activeProfileId]);
 
   const fetchProfileDetails = async (profileId?: string) => {
     const id = profileId || activeProfileId;
@@ -172,7 +170,10 @@ useEffect(() => {
       if (response.data?.status && Array.isArray(response.data.data)) {
         setTemplate(response.data.data);
         setRenderTemplate(
-          response.data.data.map((t: LoadTemplateType) => ({ ...t, image_url: undefined }))
+          response.data.data.map((t: LoadTemplateType) => ({
+            ...t,
+            image_url: undefined,
+          }))
         );
       }
     } catch (err) {
@@ -181,7 +182,13 @@ useEffect(() => {
   };
 
   const fetchTemplateData = async (templateId?: number, index?: number) => {
-    if (!templateId || typeof index !== 'number' || renderTemplate[index]?.image_url) return;
+    if (!templateId || typeof index !== 'number') return;
+
+
+    const existingItemIndex = renderTemplate.findIndex(t => t.id === templateId);
+    if (existingItemIndex !== -1 && renderTemplate[existingItemIndex]?.image_url) {
+      return;
+    }
 
     setLoadingIndex(index);
     if (!activeProfileId) return;
@@ -195,9 +202,15 @@ useEffect(() => {
       const base64Image = arrayBufferToBase64(response.data);
 
       setRenderTemplate(prev => {
-        const copy = [...prev];
-        copy[index] = { ...copy[index], image_url: `data:image/png;base64,${base64Image}` };
-        return copy;
+        const newArray = [...prev];
+        const itemIndex = newArray.findIndex(t => t.id === templateId);
+        if (itemIndex !== -1) {
+          newArray[itemIndex] = { 
+            ...newArray[itemIndex], 
+            image_url: `data:image/png;base64,${base64Image}` 
+          };
+        }
+        return newArray;
       });
     } catch (err) {
       console.log('fetchTemplateData error:', err);
@@ -217,37 +230,72 @@ useEffect(() => {
     init();
   }, []);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!activeProfileId) return;
+      fetchProfileDetails(activeProfileId);
+      if (Template.length > 0) {
+
+        setRenderTemplate(prev => prev.map(t => ({ ...t, image_url: undefined })));
+
+        if (filteredTemplates.length > 0) {
+          fetchTemplateData(filteredTemplates[0].id, 0);
+        }
+      }
+    }, [activeProfileId])
+  );
 
 
-useFocusEffect(
-  React.useCallback(() => {
-    if (!activeProfileId) return;
-    fetchProfileDetails(activeProfileId);
-    refreshTemplates();
-       fetchAllProfiles();
-  }, [activeProfileId, Template.length])
-);
-
-
+  useEffect(() => {
+    if (filteredTemplates.length > 0) {
+      const currentItem = filteredTemplates[currentIndex.current];
+      if (currentItem) {
+        const existingItem = renderTemplate.find(t => t.id === currentItem.id);
+        if (!existingItem?.image_url) {
+          fetchTemplateData(currentItem.id, currentIndex.current);
+        }
+      }
+    }
+  }, [filteredTemplates, currentIndex.current]);
 
   const handleDownload = async () => {
-    const currentTemplate = renderTemplate[currentIndex.current];
-    if (!currentTemplate?.image_url) return 
-    // Alert.alert('Error', 'Template image not available');
+    if (filteredTemplates.length === 0) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'No templates available',
+      });
+      return;
+    }
 
-Toast.show({
-type:'error',
-text1:'Error',
-text2:'Template image not available',
-});
+    const currentItem = filteredTemplates[currentIndex.current];
+    if (!currentItem) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'No template selected',
+      });
+      return;
+    }
 
-    downloadImage(currentTemplate.image_url);
+    const existingItem = renderTemplate.find(t => t.id === currentItem.id);
+    if (!existingItem?.image_url) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Template image not available',
+      });
+      return;
+    }
+
+    downloadImage(existingItem.image_url);
   };
 
   const handleNext = () => {
-    if (Template.length === 0) return;
+    if (filteredTemplates.length === 0) return;
 
-    const nextIndex = (currentIndex.current + 1) % Template.length;
+    const nextIndex = (currentIndex.current + 1) % filteredTemplates.length;
+    const nextItem = filteredTemplates[nextIndex];
 
     try {
       flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
@@ -257,16 +305,23 @@ text2:'Template image not available',
 
     currentIndex.current = nextIndex;
 
-    if (!renderTemplate[nextIndex]?.image_url && Template[nextIndex]?.id) {
-      fetchTemplateData(Template[nextIndex].id, nextIndex);
+    const existingItem = renderTemplate.find(t => t.id === nextItem.id);
+    if (nextItem && !existingItem?.image_url) {
+      fetchTemplateData(nextItem.id, nextIndex);
     }
+  };
+
+  const getCurrentTemplateImage = () => {
+    if (filteredTemplates.length === 0) return null;
+    const currentItem = filteredTemplates[currentIndex.current];
+    if (!currentItem) return null;
+    return renderTemplate.find(t => t.id === currentItem.id)?.image_url;
   };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ImageBackground source={require('../../assets/images/homebackground.png')} style={styles.backgroundImage} resizeMode="cover">
         <View style={styles.container}>
-
           <View style={styles.header}>
             <View style={styles.profileSection}>
               {loading ? (
@@ -307,18 +362,38 @@ text2:'Template image not available',
               value={searchText}
               onChangeText={text => {
                 setSearchText(text);
-                if (text.trim() === '') {
-                  setRenderTemplate(Template.map(t => ({ ...t, image_url: undefined })));
-                } else {
-                  const filtered = Template.filter(t => t.template_name?.toLowerCase().includes(text.toLowerCase()));
-                  setRenderTemplate(filtered.map(t => ({ ...t, image_url: undefined })));
-                }
                 currentIndex.current = 0;
                 flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
               }}
             />
             <Image source={require('../../assets/images/filtericon.png')} style={{ width: 22, height: 22, tintColor: '#414141' }} />
           </View>
+
+          {(searchText || activeCategory) && (
+            <View style={{ paddingHorizontal: 16, marginBottom: 8 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={{ color: '#666', fontSize: 14 }}>
+                  Found {filteredTemplates.length} result{filteredTemplates.length !== 1 ? 's' : ''}
+                  {searchText && ` for "${searchText}"`}
+                  {activeCategory && ` in "${categories.find(c => c.id === activeCategory)?.category_name}"`}
+                </Text>
+                {(searchText || activeCategory) && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setSearchText('');
+                      setActiveCategory(null);
+                      currentIndex.current = 0;
+                      flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+                    }}
+                    style={{ flexDirection: 'row', alignItems: 'center' }}
+                  >
+                    <Ionicons name="close-circle" size={16} color="#666" />
+                    <Text style={{ color: '#666', marginLeft: 4, fontSize: 12 }}>Clear filters</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+          )}
 
           <FlatList
             data={categories}
@@ -330,7 +405,11 @@ text2:'Template image not available',
               const isActive = activeCategory === item.id;
               return (
                 <TouchableOpacity
-                  onPress={() => setActiveCategory(item.id)}
+                  onPress={() => {
+                    setActiveCategory(prev => prev === item.id ? null : item.id);
+                    currentIndex.current = 0;
+                    flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+                  }}
                   style={{
                     backgroundColor: isActive ? '#FF7F32' : '#FFFFFF',
                     paddingHorizontal: 18,
@@ -350,32 +429,76 @@ text2:'Template image not available',
             }}
           />
 
-
-          {renderTemplate.length === 0 && loading ? (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}>
+          {loading ? (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
               <ActivityIndicator size="large" color="#000" />
-              <Text style={{ marginTop: 10, fontSize: 16 }}>Loading Template...</Text>
+              <Text style={{ marginTop: 10, fontSize: 16 }}>Loading...</Text>
+            </View>
+          ) : filteredTemplates.length === 0 ? (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center',}}>
+              <Text style={{ fontSize: 16, color: '#666', textAlign: 'center',justifyContent:'flex-start'}}>
+                {searchText
+                  ? `No templates found`
+                  : activeCategory
+                  ? `No templates found in "${categories.find(c => c.id === activeCategory)?.category_name}"`
+                  : 'No templates available'}
+              </Text>
+              {(searchText || activeCategory) && (
+                <TouchableOpacity
+                  onPress={() => {
+                    setSearchText('');
+                    setActiveCategory(null);
+                  }}
+                  style={{ padding: 10 }}
+                >
+                  <Text style={{ color: '#FF7F32', fontSize: 14, textDecorationLine: 'underline' }}>
+                    Clear search & filters
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
           ) : (
             <FlatList
               ref={flatListRef}
-              data={Template}
-              // pagingEnabled
+              data={filteredTemplates}
               showsVerticalScrollIndicator={false}
+              keyExtractor={item => item.id.toString()}
               renderItem={({ item, index }) => {
-                const imageUrl = renderTemplate[index]?.image_url;
+                const existingItem = renderTemplate.find(t => t.id === item.id);
+                const imageUrl = existingItem?.image_url;
                 const isLoading = loadingIndex === index && !imageUrl;
+
                 return (
                   <View style={{ height: SCREEN_HEIGHT }}>
-                  {/* <View style={styles.templateContainer}> */}
-                    {isLoading ? <ActivityIndicator size="large" /> : imageUrl ? <Image source={{ uri: imageUrl }} style={styles.templateImage} /> : <Text>No Template Available</Text>}
+                    {isLoading ? (
+                      <View style={{  justifyContent: 'center', alignItems: 'center' }}>
+                        <ActivityIndicator size="large" color="#000" />
+                        <Text style={{ marginTop: 1 }}>Loading template...</Text>
+                      </View>
+                    ) : imageUrl ? (
+                      <Image
+                        source={{ uri: imageUrl }}
+                        style={styles.templateImage}
+                        resizeMode="contain"
+                      />
+                    ) : (
+                      <View style={{  justifyContent: 'center', alignItems: 'center' }}>
+                        <Text>Template image not loaded</Text>
+                      </View>
+                    )}
                   </View>
                 );
               }}
               onMomentumScrollEnd={e => {
                 const index = Math.round(e.nativeEvent.contentOffset.y / SCREEN_HEIGHT);
-                currentIndex.current = index;
-                if (!renderTemplate[index]?.image_url) fetchTemplateData(Template[index].id, index);
+                if (index >= 0 && index < filteredTemplates.length) {
+                  currentIndex.current = index;
+                  const currentItem = filteredTemplates[index];
+                  const existingItem = renderTemplate.find(t => t.id === currentItem.id);
+                  if (currentItem && !existingItem?.image_url) {
+                    fetchTemplateData(currentItem.id, index);
+                  }
+                }
               }}
             />
           )}
@@ -385,14 +508,25 @@ text2:'Template image not available',
               <TouchableOpacity style={[styles.downloadBtn, { backgroundColor: '#FF984F' }]} onPress={() => navigation.navigate('SubscriptionModal')}>
                 <Text style={styles.downloadText}>Get Membership</Text>
               </TouchableOpacity>
-            ) : (
+            ) : filteredTemplates.length > 0 ? (
               <TouchableOpacity style={styles.downloadBtn} onPress={handleDownload}>
                 <Text style={styles.downloadText}>Download</Text>
               </TouchableOpacity>
+            ) : (
+              <TouchableOpacity style={[styles.downloadBtn, { backgroundColor: '#CCCCCC' }]} disabled>
+                <Text style={[styles.downloadText, { color: '#666' }]}>No Templates</Text>
+              </TouchableOpacity>
             )}
-            <TouchableOpacity style={styles.nextBtn} onPress={handleNext}>
-              <Text style={styles.nextText}>Next</Text>
-            </TouchableOpacity>
+
+            {filteredTemplates.length > 0 ? (
+              <TouchableOpacity style={styles.nextBtn} onPress={handleNext}>
+                <Text style={styles.nextText}>Next</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity style={[styles.nextBtn, { backgroundColor: '#CCCCCC' }]} disabled>
+                <Text style={[styles.nextText, { color: '#666' }]}>Next</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           <Modal visible={isModalVisible} transparent animationType="slide">
