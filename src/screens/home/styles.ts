@@ -1,13 +1,14 @@
-import { StyleSheet,Dimensions } from 'react-native';
+import { StyleSheet} from 'react-native';
 import {deviceHeight,deviceWidth,px} from '../../utils/dimensions';
 import color from '../../constant/color';
-const SCREEN_HEIGHT = Dimensions.get('window').height;
+// const SCREEN_HEIGHT = Dimensions.get('window').height;
 export default StyleSheet.create({
 
 
   container: {
     flex: 1,
     paddingTop: 20,
+
   },
 
   backgroundImage: {
@@ -26,12 +27,12 @@ export default StyleSheet.create({
     marginLeft: px(10),
 
 
-
   },
   profileSection: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingRight: px(10),
+
   },
 
 profileImageContainer:{
@@ -46,6 +47,7 @@ width: px(42),
     borderBottomLeftRadius: px(12),
     marginRight: px(10),
     overflow: 'hidden',
+
 },
 
   profileImg: {
@@ -60,6 +62,7 @@ width: px(42),
   welcomeText: {
     fontSize: px(12),
     color: color.logotext,
+
   },
   userName: {
     fontSize: px(16),
@@ -69,6 +72,7 @@ width: px(42),
   iconContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+
   },
   headerIcon: {
     width: px(25),
@@ -106,6 +110,8 @@ width: px(42),
        marginLeft: px(18),
        borderRadius: px(6),
        gap:px(5),
+
+
   },
 
   posterCard: {
@@ -118,7 +124,6 @@ width: px(42),
   posterImg: {
     borderRadius: px(5),
     marginTop: px(10),
-    // backgroundColor:'red',
   },
   fixedActionRow: {
   position: 'absolute',
@@ -131,10 +136,11 @@ width: px(42),
 }
 ,
   actionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: px(110),
-    marginTop:px(2),
+    // flexDirection: 'row',
+    // justifyContent: 'space-between',
+    // // marginBottom: px(110),
+    // marginTop:px(2),
+    // backgroundColor:'red',
   },
   downloadBtn: {
     flex: 1,
@@ -401,23 +407,18 @@ width: px(48),
   templateContainer: {
     alignItems: 'center',
   // marginHorizontal: px(10),
-// height:px(10),
+  paddingTop:0,
   },
   templateImage: {
-    // width: deviceWidth  - px(30),
-    // height: px(450),
-    // borderRadius: px(10),
-    // backgroundColor: '#f5f5f5',
-    // marginLeft:px(15),
-    // marginRight:px(15),
-    // marginTop:px(10),
-
       width: deviceWidth - px(30),
-  height: SCREEN_HEIGHT - px(350),
+  // height: SCREEN_HEIGHT - px(340),
+    aspectRatio: 3 / 4,
   resizeMode: 'contain',
   borderRadius: px(10),
   backgroundColor: '#f5f5f5',
-  // marginHorizontal: px(15),
+
+
+
   marginTop: px(10),
    marginLeft:px(15),
     marginRight:px(15),
@@ -425,18 +426,11 @@ width: px(48),
 
   },
   placeholderImage: {
-    // width: deviceWidth,
-    // height: px(200),
     justifyContent:'flex-start',
     alignItems: 'center',
-    // flex:2,
 
-    // borderRadius: px(12),
   },
   templateInfo: {
-    // marginTop: px(16),
-    // width: deviceWidth,
-    // paddingHorizontal: px(8),
     marginLeft:5,
     marginRight:5,
   },
@@ -452,13 +446,13 @@ width: px(48),
     marginLeft:2,
     marginRight:2,
     color: '#666',
-    // textAlign: 'center',
-    // lineHeight: px(20),
+
   },
   noTemplateContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     padding: px(40),
+
   },
   noTemplateText: {
     fontSize: px(16),

@@ -1,4 +1,5 @@
 
+
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View,
@@ -28,6 +29,7 @@ import { RootState } from '../../redux/store';
 import { setActiveProfile } from '../../redux/slice/profile';
 import { useFocusEffect } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
+import { px } from '../../utils/dimensions';
 
 type HomeScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'PersonalProfile'>;
@@ -83,6 +85,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [profilesLoading, setProfilesLoading] = useState(false);
   const [loadingIndex, setLoadingIndex] = useState<number | null>(null);
+  const [initialLoading, setInitialLoading] = useState(true);
 
 
   const filteredTemplates = useMemo(() => {
@@ -181,9 +184,52 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }
   };
 
+  const fetchAllTemplateImages = async () => {
+    if (!activeProfileId || filteredTemplates.length === 0) return;
+
+    try {
+      setInitialLoading(true);
+
+      for (let i = 0; i < filteredTemplates.length; i++) {
+        const template = filteredTemplates[i];
+
+        const existingItemIndex = renderTemplate.findIndex(t => t.id === template.id);
+        if (existingItemIndex !== -1 && renderTemplate[existingItemIndex]?.image_url) {
+          continue;
+        }
+
+        try {
+          const response = await axiosInstance.get(
+            `${API_ENDPOINTS.HOME_SCREEN_LOAD_TEMPLATE}?profile_id=${activeProfileId}&template_id=${template.id}`,
+            { responseType: 'arraybuffer' }
+          );
+
+          const base64Image = arrayBufferToBase64(response.data);
+
+          setRenderTemplate(prev => {
+            const newArray = [...prev];
+            const itemIndex = newArray.findIndex(t => t.id === template.id);
+            if (itemIndex !== -1) {
+              newArray[itemIndex] = { 
+                ...newArray[itemIndex], 
+                image_url: `data:image/png;base64,${base64Image}` 
+              };
+            }
+            return newArray;
+          });
+        } catch (err) {
+          console.log(`Error loading template ${template.id}:`, err);
+        }
+      }
+    } catch (err) {
+      console.log('fetchAllTemplateImages error:', err);
+    } finally {
+      setInitialLoading(false);
+    }
+  };
+
   const fetchTemplateData = async (templateId?: number, index?: number) => {
     if (!templateId || typeof index !== 'number') return;
-
 
     const existingItemIndex = renderTemplate.findIndex(t => t.id === templateId);
     if (existingItemIndex !== -1 && renderTemplate[existingItemIndex]?.image_url) {
@@ -207,7 +253,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         if (itemIndex !== -1) {
           newArray[itemIndex] = { 
             ...newArray[itemIndex], 
-            image_url: `data:image/png;base64,${base64Image}` 
+            image_url: `data:image/png;base64,${base64Image}`
           };
         }
         return newArray;
@@ -234,20 +280,24 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     React.useCallback(() => {
       if (!activeProfileId) return;
       fetchProfileDetails(activeProfileId);
-      if (Template.length > 0) {
 
+      if (Template.length > 0) {
         setRenderTemplate(prev => prev.map(t => ({ ...t, image_url: undefined })));
 
-        if (filteredTemplates.length > 0) {
-          fetchTemplateData(filteredTemplates[0].id, 0);
-        }
+        fetchAllTemplateImages();
       }
     }, [activeProfileId])
   );
 
 
   useEffect(() => {
-    if (filteredTemplates.length > 0) {
+    if (filteredTemplates.length > 0 && activeProfileId) {
+      fetchAllTemplateImages();
+    }
+  }, [filteredTemplates, activeProfileId]);
+
+  useEffect(() => {
+    if (filteredTemplates.length > 0 && !initialLoading) {
       const currentItem = filteredTemplates[currentIndex.current];
       if (currentItem) {
         const existingItem = renderTemplate.find(t => t.id === currentItem.id);
@@ -256,7 +306,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         }
       }
     }
-  }, [filteredTemplates, currentIndex.current]);
+  }, [filteredTemplates, currentIndex.current, initialLoading]);
 
   const handleDownload = async () => {
     if (filteredTemplates.length === 0) {
@@ -306,7 +356,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     currentIndex.current = nextIndex;
 
     const existingItem = renderTemplate.find(t => t.id === nextItem.id);
-    if (nextItem && !existingItem?.image_url) {
+    if (nextItem && !existingItem?.image_url && !initialLoading) {
       fetchTemplateData(nextItem.id, nextIndex);
     }
   };
@@ -411,14 +461,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
                   }}
                   style={{
-                    backgroundColor: isActive ? '#FF7F32' : '#FFFFFF',
-                    paddingHorizontal: 18,
-                    height: 34,
+                    backgroundColor: isActive ? '#FF7F32' : '#FFFFFF', 
+                    paddingHorizontal: 18, 
+                    height: 34, 
                     borderRadius: 20,
                     marginRight: 8,
                     borderWidth: isActive ? 0 : 1,
                     borderColor: '#C5C5C5',
-                    justifyContent: 'center',
+                    justifyContent: 'center'
                   }}
                 >
                   <Text style={{ color: isActive ? '#FFFFFF' : '#000000', fontSize: 12, fontWeight: '700' }}>
@@ -435,8 +485,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               <Text style={{ marginTop: 10, fontSize: 16 }}>Loading...</Text>
             </View>
           ) : filteredTemplates.length === 0 ? (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center',}}>
-              <Text style={{ fontSize: 16, color: '#666', textAlign: 'center',justifyContent:'flex-start'}}>
+            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 16}}>
+              <Text style={{ fontSize: 16, color: '#666', textAlign: 'center' }}>
                 {searchText
                   ? `No templates found`
                   : activeCategory
@@ -458,49 +508,62 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               )}
             </View>
           ) : (
-            <FlatList
-              ref={flatListRef}
-              data={filteredTemplates}
-              showsVerticalScrollIndicator={false}
-              keyExtractor={item => item.id.toString()}
-              renderItem={({ item, index }) => {
-                const existingItem = renderTemplate.find(t => t.id === item.id);
-                const imageUrl = existingItem?.image_url;
-                const isLoading = loadingIndex === index && !imageUrl;
+            <>
+              {initialLoading && (
+                <View style={{ paddingVertical: 20, alignItems: 'center' }}>
+                  <ActivityIndicator size="small" color="#000" />
+                  <Text style={{ marginTop: 1, fontSize: 12, color: '#666' }}>
+                    Loading all templates...
+                  </Text>
+                </View>
+              )}
+              <FlatList
+                ref={flatListRef}
+                data={filteredTemplates}
+                showsVerticalScrollIndicator={false}
+                keyExtractor={item => item.id.toString()}
+                contentContainerStyle={{
+                  paddingBottom: px(100),
+                }}
+                renderItem={({ item, index }) => {
+                  const existingItem = renderTemplate.find(t => t.id === item.id);
+                  const imageUrl = existingItem?.image_url;
+                  const isLoading = loadingIndex === index && !imageUrl && !initialLoading;
 
-                return (
-                  <View style={{ height: SCREEN_HEIGHT }}>
-                    {isLoading ? (
-                      <View style={{  justifyContent: 'center', alignItems: 'center' }}>
-                        <ActivityIndicator size="large" color="#000" />
-                        <Text style={{ marginTop: 1 }}>Loading template...</Text>
-                      </View>
-                    ) : imageUrl ? (
-                      <Image
-                        source={{ uri: imageUrl }}
-                        style={styles.templateImage}
-                        resizeMode="contain"
-                      />
-                    ) : (
-                      <View style={{  justifyContent: 'center', alignItems: 'center' }}>
-                        <Text>Template image not loaded</Text>
-                      </View>
-                    )}
-                  </View>
-                );
-              }}
-              onMomentumScrollEnd={e => {
-                const index = Math.round(e.nativeEvent.contentOffset.y / SCREEN_HEIGHT);
-                if (index >= 0 && index < filteredTemplates.length) {
-                  currentIndex.current = index;
-                  const currentItem = filteredTemplates[index];
-                  const existingItem = renderTemplate.find(t => t.id === currentItem.id);
-                  if (currentItem && !existingItem?.image_url) {
-                    fetchTemplateData(currentItem.id, index);
+                  return (
+                    <View style={{  justifyContent: 'center', alignItems: 'center', minHeight: SCREEN_HEIGHT * 0.7 }}>
+                      {isLoading ? (
+                        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                          <ActivityIndicator size="large" color="#000" />
+                          <Text style={{ marginTop: 5}}>Loading template...</Text>
+                        </View>
+                      ) : imageUrl ? (
+                        <Image
+                          source={{ uri: imageUrl }}
+                          style={styles.templateImage}
+                          resizeMode="contain"
+                        />
+                      ) : initialLoading ? (
+                        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                          {/* <ActivityIndicator size="small" color="#000" /> */}
+                          {/* <Text style={{ marginTop: 5 }}>Loading...</Text> */}
+                        </View>
+                      ) : (
+                        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                          <Text>Template image not loaded</Text>
+                        </View>
+                      )}
+                    </View>
+                  );
+                }}
+                onMomentumScrollEnd={e => {
+                  const index = Math.round(e.nativeEvent.contentOffset.y / (SCREEN_HEIGHT * 0.7));
+                  if (index >= 0 && index < filteredTemplates.length) {
+                    currentIndex.current = index;
                   }
-                }
-              }}
-            />
+                }}
+              />
+            </>
           )}
 
           <View style={styles.fixedActionRow}>
@@ -508,23 +571,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               <TouchableOpacity style={[styles.downloadBtn, { backgroundColor: '#FF984F' }]} onPress={() => navigation.navigate('SubscriptionModal')}>
                 <Text style={styles.downloadText}>Get Membership</Text>
               </TouchableOpacity>
-            ) : filteredTemplates.length > 0 ? (
+            ) : filteredTemplates.length > 0 && (
               <TouchableOpacity style={styles.downloadBtn} onPress={handleDownload}>
                 <Text style={styles.downloadText}>Download</Text>
               </TouchableOpacity>
-            ) : (
-              <TouchableOpacity style={[styles.downloadBtn, { backgroundColor: '#CCCCCC' }]} disabled>
-                <Text style={[styles.downloadText, { color: '#666' }]}>No Templates</Text>
-              </TouchableOpacity>
             )}
 
-            {filteredTemplates.length > 0 ? (
+            {filteredTemplates.length > 0 && (
               <TouchableOpacity style={styles.nextBtn} onPress={handleNext}>
                 <Text style={styles.nextText}>Next</Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity style={[styles.nextBtn, { backgroundColor: '#CCCCCC' }]} disabled>
-                <Text style={[styles.nextText, { color: '#666' }]}>Next</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -565,14 +620,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                           <Text style={styles.profileTagText}>{item.profile_type || 'Personal'}</Text>
                         </View>
                       </View>
+
                       <View
-                        style={{
+                        style={{ 
                           width: 26,
                           height: 26,
                           borderRadius: 13,
                           backgroundColor: profileData?.id === item.id ? '#FF7F32' : '#D9D9D9',
                           justifyContent: 'center',
-                          alignItems: 'center',
+                          alignItems: 'center'
                         }}
                       >
                         <Ionicons name="checkmark" size={18} color="#fff" />

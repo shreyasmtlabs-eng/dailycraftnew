@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import styles from './styles';
-import { downloadImage } from '../../component/Downloadhelper';
+// import { downloadImage } from '../../component/Downloadhelper';
 
 const images = [
   require('../../assets/images/posterimage.png'),
@@ -26,61 +26,59 @@ const images = [
 const Recommend = () => {
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  const handleDownload = async () => {
-    console.log('handleDownload clicked');
-    try {
-      const source = Image.resolveAssetSource(images[currentIndex]);
-      if (!source?.uri) return;
+  console.log('currentIndex:>>>>>' , currentIndex);
 
 
-      if (source.uri.startsWith('http')) {
-        await downloadImage(source.uri);
+const handleDownload = async () => {
+       console.log('handleDownload clicked>>>>>');
+  try {
+    const source = Image.resolveAssetSource(images[currentIndex]);
+
+ console.log('image>>>>>:',source);
+
+    if (!source?.uri) {
+       console.log('image not found>>>>>');
+      return;
+    }
+
+
+     let localPath = source.uri;
+    if (Platform.OS === 'android' && !localPath.startsWith('file://')) {
+          console.log('android permissions>>>');
+      const permission =
+        Platform.Version >= 33
+          ? PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES
+          : PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE;
+
+      const granted = await PermissionsAndroid.request(permission);
+
+      if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+        Alert.alert('Permission denied');
         return;
       }
+    }
+
+    const fileName = `recommend_${Date.now()}.jpg`;
+    const destPath = `${RNFS.CachesDirectoryPath}/${fileName}`;
 
 
-      if (Platform.OS === 'android') {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-          {
-            title: 'Storage Permission Required',
-            message: 'App needs access to your storage to download the image',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          }
-        );
-        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-          Alert.alert('Permission denied', 'Cannot save image without storage permission');
-          return;
-        }
-      }
+    await RNFS.downloadFile({
+      fromUrl: source.uri,
+      toFile: destPath,
+    }).promise;
 
-      const filename = `image_${currentIndex}.jpg`;
-      const destPath = `${RNFS.CachesDirectoryPath}/${filename}`;
+    await CameraRoll.save(destPath, { type: 'photo' });
 
-
-      if (Platform.OS === 'android') {
-  console.log('Asset URI:', source.uri);
-        await RNFS.copyFileAssets(source.uri.replace('asset:/', ''), destPath);
-
-      } else {
-
-        await RNFS.copyFile(source.uri.replace('file://', ''), destPath);
-      }
-
-
-      await CameraRoll.save(destPath, { type: 'photo' });
-
-      Alert.alert('Success', 'Image downloaded to gallery!');
+    Alert.alert('Success', 'Image saved to gallery');
       console.log('Downloaded to gallery:>>>>>', destPath);
 
-    } catch (error) {
-      console.log('Recommend download failed:', error);
-      Alert.alert('Error', 'Failed to download image');
-    }
-  };
+  } catch (error) {
+    console.log('Download failed:>>>>>>', error);
+    Alert.alert('Error', 'Failed to save image');
+  }
+};
+
+
 
 
   const handleNext = () => {
