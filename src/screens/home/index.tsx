@@ -1,6 +1,6 @@
 
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo,useCallback } from 'react';
 import {
   View,
   Text,
@@ -47,12 +47,14 @@ type ProfileItemType = {
   name?: string;
   avatar?: string;
   profile_type?: string;
+  is_primary?: boolean;
 };
 
 type ProfileDataType = {
   id?: string;
   name?: string;
   avatar?: string;
+  is_primary?: boolean;
 };
 
 type LoadTemplateType = {
@@ -69,11 +71,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const currentIndex = useRef(0);
   const dispatch = useDispatch();
 
-  const token = useSelector((state: RootState) => state.auth.token);
   const activeProfileId = useSelector((state: RootState) => state.profile.activeProfileId);
   const isPremium = useSelector((state: RootState) => state.membership.isPremium);
+  const token = useSelector((state: RootState) => state.auth.token);
 
-  const [networkError, setNetworkError] = useState(false);
+  const [_networkError, setNetworkError] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [categories, setCategories] = useState<CategoryType[]>([]);
@@ -86,7 +88,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [profilesLoading, setProfilesLoading] = useState(false);
   const [loadingIndex, setLoadingIndex] = useState<number | null>(null);
   const [initialLoading, setInitialLoading] = useState(true);
-
+  const [reload, setReload] = useState(0);
 
   const filteredTemplates = useMemo(() => {
     let result = [...Template];
@@ -131,7 +133,22 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       clearNetworkError();
 
       if (response.data?.status && Array.isArray(response.data.data)) {
-        setAllProfiles(response.data.data);
+        console.log('ALL PROFILES:>>>>>', response.data.data);
+
+        const sortedProfiles = [...response.data.data].sort((a, b) => {
+          return (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0);
+        });
+
+        setAllProfiles(sortedProfiles);
+
+        if ((!activeProfileId || activeProfileId === '') && sortedProfiles.length > 0) {
+          const primaryProfile = sortedProfiles.find(profile => profile.is_primary) || sortedProfiles[0];
+          dispatch(setActiveProfile(primaryProfile.id.toString()));
+
+          if (!sortedProfiles.some(p => p.is_primary)) {
+            await makeProfilePrimary(primaryProfile.id.toString());
+          }
+        }
       } else {
         setAllProfiles([]);
       }
@@ -144,14 +161,38 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }
   };
 
-  useEffect(() => {
-    if (
-      (activeProfileId === null || activeProfileId === undefined || activeProfileId === '') &&
-      allProfiles.length > 0
-    ) {
-      dispatch(setActiveProfile(allProfiles[0].id.toString()));
+  const makeProfilePrimary = async (profileId: string) => {
+    try {
+      const response = await axiosInstance.post(API_ENDPOINTS.MAKE_PRIMARY, {
+        profile_id: parseInt(profileId)
+      });
+
+      if (response.data?.status) {
+        console.log('Profile set as primary:', profileId);
+        await fetchAllProfiles();
+      }
+    } catch (error) {
+      console.log('Error making profile primary:', error);
     }
-  }, [allProfiles, activeProfileId]);
+  };
+
+
+  useEffect(() => {
+    const ensurePrimaryProfile = async () => {
+      if (allProfiles.length > 0 && token) {
+        const hasPrimary = allProfiles.some(profile => profile.is_primary);
+
+        if (!hasPrimary) {
+          const firstProfile = allProfiles[0];
+          await makeProfilePrimary(firstProfile.id.toString());
+        }
+      }
+    };
+
+    if (allProfiles.length > 0) {
+      ensurePrimaryProfile();
+    }
+  }, [allProfiles, token]);
 
   const fetchProfileDetails = async (profileId?: string) => {
     const id = profileId || activeProfileId;
@@ -160,7 +201,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     try {
       const response = await axiosInstance.get(`${API_ENDPOINTS.GET_DETAILS}${id}`);
       clearNetworkError();
-      if (response.data?.status && response.data.data) setProfileData(response.data.data);
+      if (response.data?.status && response.data.data) {
+        const newProfileData = response.data.data;
+        setProfileData(newProfileData);
+        setReload(prev => prev + 1);
+      }
     } catch (err) {
       handleNetworkError(err);
       console.log('Error fetching profile details:', err);
@@ -193,11 +238,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       for (let i = 0; i < filteredTemplates.length; i++) {
         const template = filteredTemplates[i];
 
-        const existingItemIndex = renderTemplate.findIndex(t => t.id === template.id);
-        if (existingItemIndex !== -1 && renderTemplate[existingItemIndex]?.image_url) {
-          continue;
-        }
-
         try {
           const response = await axiosInstance.get(
             `${API_ENDPOINTS.HOME_SCREEN_LOAD_TEMPLATE}?profile_id=${activeProfileId}&template_id=${template.id}`,
@@ -210,9 +250,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             const newArray = [...prev];
             const itemIndex = newArray.findIndex(t => t.id === template.id);
             if (itemIndex !== -1) {
-              newArray[itemIndex] = { 
-                ...newArray[itemIndex], 
-                image_url: `data:image/png;base64,${base64Image}` 
+              newArray[itemIndex] = {
+                ...newArray[itemIndex],
+                image_url: `data:image/png;base64,${base64Image}`
               };
             }
             return newArray;
@@ -251,9 +291,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         const newArray = [...prev];
         const itemIndex = newArray.findIndex(t => t.id === templateId);
         if (itemIndex !== -1) {
-          newArray[itemIndex] = { 
-            ...newArray[itemIndex], 
-            image_url: `data:image/png;base64,${base64Image}`
+          newArray[itemIndex] = {
+            ...newArray[itemIndex],
+            image_url: `data:image/png;base64,${base64Image}`,
           };
         }
         return newArray;
@@ -279,22 +319,28 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   useFocusEffect(
     React.useCallback(() => {
       if (!activeProfileId) return;
-      fetchProfileDetails(activeProfileId);
 
-      if (Template.length > 0) {
-        setRenderTemplate(prev => prev.map(t => ({ ...t, image_url: undefined })));
+      const reloadTemplates = async () => {
+        fetchProfileDetails(activeProfileId);
 
-        fetchAllTemplateImages();
-      }
+        if (Template.length > 0) {
+          setRenderTemplate(prev => prev.map(t => ({ ...t, image_url: undefined })));
+
+          currentIndex.current = 0;
+          flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+
+          setReload(prev => prev + 1);
+        }
+      };
+      reloadTemplates();
     }, [activeProfileId])
   );
 
-
   useEffect(() => {
-    if (filteredTemplates.length > 0 && activeProfileId) {
+    if (filteredTemplates.length > 0 && activeProfileId && reload > 0) {
       fetchAllTemplateImages();
     }
-  }, [filteredTemplates, activeProfileId]);
+  }, [filteredTemplates, activeProfileId, reload]);
 
   useEffect(() => {
     if (filteredTemplates.length > 0 && !initialLoading) {
@@ -359,13 +405,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     if (nextItem && !existingItem?.image_url && !initialLoading) {
       fetchTemplateData(nextItem.id, nextIndex);
     }
-  };
-
-  const getCurrentTemplateImage = () => {
-    if (filteredTemplates.length === 0) return null;
-    const currentItem = filteredTemplates[currentIndex.current];
-    if (!currentItem) return null;
-    return renderTemplate.find(t => t.id === currentItem.id)?.image_url;
   };
 
   return (
@@ -462,15 +501,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   }}
                   style={{
                     backgroundColor: isActive ? '#FF7F32' : '#FFFFFF', 
-                    paddingHorizontal: 18, 
-                    height: 34, 
-                    borderRadius: 20,
-                    marginRight: 8,
-                    borderWidth: isActive ? 0 : 1,
-                    borderColor: '#C5C5C5',
-                    justifyContent: 'center'
-                  }}
-                >
+                    paddingHorizontal: 18,  height: 34,  borderRadius: 20, marginRight: 8, borderWidth: isActive ? 0 : 1,
+                    borderColor: '#C5C5C5',justifyContent: 'center'}}>
                   <Text style={{ color: isActive ? '#FFFFFF' : '#000000', fontSize: 12, fontWeight: '700' }}>
                     {item.category_name}
                   </Text>
@@ -613,24 +645,31 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     >
                       <View style={styles.avatarBorderBox}>
                         <Image source={item.avatar ? { uri: item.avatar } : require('../../assets/images/shubhamicon.png')} style={styles.profileAvatar} />
+                        {item.is_primary && (
+                          <View style={styles.primaryBadgeSmall}>
+                            <Ionicons name="star" size={12} color="#FFD700" />
+                          </View>
+                        )}
                       </View>
                       <View style={styles.profileInfo}>
                         <Text style={styles.profileName}>{item.name || 'User'}</Text>
-                        <View style={styles.profileTag}>
-                          <Text style={styles.profileTagText}>{item.profile_type || 'Personal'}</Text>
+                        <View style={styles.profileTagContainer}>
+                          <View style={styles.profileTag}>
+                            <Text style={styles.profileTagText}>{item.profile_type || 'Personal'}</Text>
+                          </View>
+                          {item.is_primary && (
+                            <View style={styles.primaryTag}>
+                              <Text style={styles.primaryTagText}>Primary</Text>
+                            </View>
+                          )}
                         </View>
                       </View>
 
                       <View
-                        style={{ 
-                          width: 26,
-                          height: 26,
-                          borderRadius: 13,
+                        style={{width: 26,height: 26,borderRadius: 13,
                           backgroundColor: profileData?.id === item.id ? '#FF7F32' : '#D9D9D9',
-                          justifyContent: 'center',
-                          alignItems: 'center'
-                        }}
-                      >
+                          justifyContent: 'center',alignItems: 'center'}} >
+
                         <Ionicons name="checkmark" size={18} color="#fff" />
                       </View>
                     </TouchableOpacity>

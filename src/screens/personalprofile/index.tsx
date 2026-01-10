@@ -185,7 +185,22 @@ if(data?.status){
           text1: data.message || 'Profile created successfully',
         });
 
-//  await AsyncStorage.setItem('is_register', 'true');
+
+  const profilesResponse = await axiosInstance.get(API_ENDPOINTS.GET_ALL_PROFILES);
+  const allProfiles = profilesResponse.data?.data || [];
+
+  if (allProfiles.length === 1) {
+    try {
+      await axiosInstance.post(API_ENDPOINTS.MAKE_PRIMARY, {
+        profile_id: data.data.id,
+      });
+      console.log('First profile set as primary');
+    } catch (error) {
+      console.log('Error profile primary:', error);
+    }
+  }
+
+
  console.log('Dispatching setIsRegister(true)');
 
  dispatch(setIsRegister(true));

@@ -26,7 +26,7 @@ type EditProfileProps = {
 };
 
 const EditProfile = ({ navigation }: EditProfileProps) => {
-  const [profileData, setProfileData] = useState<any>(null);
+  // const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [networkError, setNetworkError] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);

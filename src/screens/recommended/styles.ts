@@ -1,7 +1,7 @@
 import { FONT } from './../../assets/fonts/index';
 
 
-import { StyleSheet } from 'react-native';
+import { StyleSheet} from 'react-native';
 import { px, deviceWidth } from '../../utils/dimensions';
 import color from '../../constant/color';
 
@@ -67,7 +67,8 @@ const styles = StyleSheet.create({
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: deviceWidth * 1,
+    // width: deviceWidth * 1,
+    width : px(200),
     marginTop: px(15),
   },
   downloadBtn: {
@@ -87,10 +88,12 @@ const styles = StyleSheet.create({
   },
   nextBtn: {
     flex: 1,
-    backgroundColor:color.downloadtext,
+    backgroundColor:color.primary,
+    // backgroundColor:'red',
     borderRadius: px(10),
-    paddingVertical: px(12),
-    paddingHorizontal: px(20),
+    paddingVertical: px(11),
+    // paddingHorizontal: px(20),
+    width:px(10),
     borderWidth: 1,
     marginRight: px(10),
     marginLeft: px(10),
@@ -98,7 +101,7 @@ const styles = StyleSheet.create({
     borderColor: color.borderwhite,
   },
   nextText: {
-    color: color.textPrimary,
+    color: color.border,
     fontWeight: '600',
     fontSize: px(18),
   },

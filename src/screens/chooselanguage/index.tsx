@@ -31,7 +31,7 @@ const ChooseLanguage = ({ navigation }: ChooseLanguageProps) => {
           setLanguages(response.data.data);
           setSelected(response.data.data[0]?.language_name || '');
         } else {
-          console.log('Error', 'Failed to fetch languages');
+          console.log('Error>>>>>', 'Failed to fetch languages');
         }
       } catch (error) {
         console.log('Error fetching languages:', error);

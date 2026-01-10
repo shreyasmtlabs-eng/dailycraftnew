@@ -18,7 +18,7 @@ type ChooseProfileTypeProps = {
 }
 
 const ChooseProfileType = ({ navigation } : ChooseProfileTypeProps) => {
-  const [selected, setSelected] = useState('personal');
+const [selected, setSelected] = useState('personal');
 
   const handleContinue = () => {
 if( selected === 'personal'){
@@ -117,11 +117,11 @@ if( selected === 'personal'){
         </TouchableOpacity>
       </View>
 <View style={styles.bottomContainer}>
-  <Button
-    title="Continue"  onPress = {handleContinue}
-  />
+
+  <Button title="Continue"  onPress = {handleContinue} />
+
 </View>
-    </View>
+</View>
 
   );
 };

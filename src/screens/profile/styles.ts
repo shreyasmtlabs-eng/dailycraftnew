@@ -123,6 +123,47 @@ const styles = StyleSheet.create({
     height: px(20),
     // tintColor: '#ff914d',
   },
+
+  modalContainer: {
+  flex: 1,
+  backgroundColor: 'rgba(0,0,0,0.5)',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+modalContent: {
+  width: '90%',
+  maxHeight: '70%',
+  // backgroundColor: color.border,
+  backgroundColor:'#FFFFFF',
+  borderRadius: 20,
+  padding: 20,
+},
+modalTitle: {
+  fontSize: 18,
+  fontWeight: 'bold',
+  marginBottom: 15,
+},
+profileRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  paddingVertical: 12,
+  borderBottomWidth: 1,
+  borderBottomColor: '#ccc',
+},
+profilesName: {
+  fontSize: 16,
+},
+modalCloseButton: {
+  marginTop: 15,
+  alignItems: 'center',
+},
+modalCloseText: {
+  fontSize: 16,
+  fontWeight: 'bold',
+  color: '#ff914d',
+},
+
 });
 
 export default styles;
