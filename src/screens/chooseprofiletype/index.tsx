@@ -25,7 +25,6 @@ if( selected === 'personal'){
   navigation.navigate('PersonalProfile');
 }else if( selected === 'business'){
   navigation.navigate('BusinessProfile');
-
 }
 
 

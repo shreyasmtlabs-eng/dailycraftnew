@@ -26,7 +26,7 @@ type TemplateItem = {
 const Download = () => {
   const [templates, setTemplates] = useState<TemplateItem[]>([]);
   const [loading, setLoading] = useState(true);
-    const [networkError, setNetworkError] = useState(false);
+  const [networkError, setNetworkError] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
 

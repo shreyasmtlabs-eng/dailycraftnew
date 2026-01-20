@@ -412,7 +412,8 @@ width: px(48),
   templateImage: {
       width: deviceWidth - px(30),
   // height: SCREEN_HEIGHT - px(340),
-    aspectRatio: 3 / 4,
+   aspectRatio: 3 / 4,
+    // aspectRatio: 4 / 5,
   resizeMode: 'contain',
   borderRadius: px(10),
   backgroundColor: '#f5f5f5',
@@ -422,7 +423,7 @@ width: px(48),
   marginTop: px(10),
    marginLeft:px(15),
     marginRight:px(15),
-    marginBottom:px(2),
+    // marginBottom:px(2),
 
   },
   placeholderImage: {

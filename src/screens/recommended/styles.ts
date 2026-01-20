@@ -1,6 +1,4 @@
 import { FONT } from './../../assets/fonts/index';
-
-
 import { StyleSheet} from 'react-native';
 import { px, deviceWidth } from '../../utils/dimensions';
 import color from '../../constant/color';

@@ -1,6 +1,5 @@
 
-
-import React, { useState, useRef, useEffect, useMemo,useCallback } from 'react';
+import React,{ useState, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -109,7 +108,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }, [Template, searchText, activeCategory]);
 
   const handleNetworkError = (error: any) => {
-    if (!error?.response || error.code === 'ERR_NETWORK') setNetworkError(true);
+    if (!error?.response || error.code === 'ERR_NETWORK') {
+      setNetworkError(true);
+    }
   };
   const clearNetworkError = () => setNetworkError(false);
 
@@ -119,7 +120,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     try {
       const response = await adminAxios.get(API_ENDPOINTS.GET_ALL_CATEGORY);
       clearNetworkError();
-      if (response.data?.status) setCategories(response.data.data || []);
+      if (response.data?.status) {
+        setCategories(response.data.data || []);
+      }
     } catch (err) {
       handleNetworkError(err);
       console.log('Error fetching categories:', err);
@@ -196,7 +199,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   const fetchProfileDetails = async (profileId?: string) => {
     const id = profileId || activeProfileId;
-    if (!id) return;
+    if (!id) {
+      return;
+    }
 
     try {
       const response = await axiosInstance.get(`${API_ENDPOINTS.GET_DETAILS}${id}`);
@@ -230,8 +235,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   };
 
   const fetchAllTemplateImages = async () => {
-    if (!activeProfileId || filteredTemplates.length === 0) return;
-
+    if (!activeProfileId || filteredTemplates.length === 0) {
+      return;
+    }
     try {
       setInitialLoading(true);
 
@@ -252,7 +258,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             if (itemIndex !== -1) {
               newArray[itemIndex] = {
                 ...newArray[itemIndex],
-                image_url: `data:image/png;base64,${base64Image}`
+                image_url: `data:image/png;base64,${base64Image}`,
               };
             }
             return newArray;
@@ -269,15 +275,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   };
 
   const fetchTemplateData = async (templateId?: number, index?: number) => {
-    if (!templateId || typeof index !== 'number') return;
-
+    if (!templateId || typeof index !== 'number') {
+      return;
+    }
     const existingItemIndex = renderTemplate.findIndex(t => t.id === templateId);
     if (existingItemIndex !== -1 && renderTemplate[existingItemIndex]?.image_url) {
       return;
     }
 
     setLoadingIndex(index);
-    if (!activeProfileId) return;
+    if (!activeProfileId) {
+      return;
+    }
 
     try {
       const response = await axiosInstance.get(
@@ -318,9 +327,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      if (!activeProfileId) return;
-
+      if (!activeProfileId) {
+        return;
+      }
       const reloadTemplates = async () => {
+              await fetchAllProfiles();
         fetchProfileDetails(activeProfileId);
 
         if (Template.length > 0) {
@@ -388,7 +399,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   };
 
   const handleNext = () => {
-    if (filteredTemplates.length === 0) return;
+    if (filteredTemplates.length === 0) {
+      return;
+    }
 
     const nextIndex = (currentIndex.current + 1) % filteredTemplates.length;
     const nextItem = filteredTemplates[nextIndex];
@@ -500,7 +513,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
                   }}
                   style={{
-                    backgroundColor: isActive ? '#FF7F32' : '#FFFFFF', 
+                    backgroundColor: isActive ? '#FF7F32' : '#FFFFFF',
                     paddingHorizontal: 18,  height: 34,  borderRadius: 20, marginRight: 8, borderWidth: isActive ? 0 : 1,
                     borderColor: '#C5C5C5',justifyContent: 'center'}}>
                   <Text style={{ color: isActive ? '#FFFFFF' : '#000000', fontSize: 12, fontWeight: '700' }}>
@@ -646,20 +659,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                       <View style={styles.avatarBorderBox}>
                         <Image source={item.avatar ? { uri: item.avatar } : require('../../assets/images/shubhamicon.png')} style={styles.profileAvatar} />
                         {item.is_primary && (
-                          <View style={styles.primaryBadgeSmall}>
+                          <View>
                             <Ionicons name="star" size={12} color="#FFD700" />
                           </View>
                         )}
                       </View>
                       <View style={styles.profileInfo}>
                         <Text style={styles.profileName}>{item.name || 'User'}</Text>
-                        <View style={styles.profileTagContainer}>
+                        <View>
                           <View style={styles.profileTag}>
                             <Text style={styles.profileTagText}>{item.profile_type || 'Personal'}</Text>
                           </View>
                           {item.is_primary && (
-                            <View style={styles.primaryTag}>
-                              <Text style={styles.primaryTagText}>Primary</Text>
+                            <View>
+                              <Text>Primary</Text>
                             </View>
                           )}
                         </View>

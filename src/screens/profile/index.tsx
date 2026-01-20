@@ -53,8 +53,9 @@ const Profile = ({ navigation }: ProfileProps) => {
 
     try {
       const id = profileId || activeProfileId;
-      if (!id) return;
-
+      if (!id) {
+        return;
+      }
       const response = await axiosInstance.get(`${API_ENDPOINTS.GET_DETAILS}${id}`);
 
       console.log('get profiles details on profiles:>>>>>', response.data);
@@ -250,7 +251,7 @@ const Profile = ({ navigation }: ProfileProps) => {
                               </Text>
                             )}
                             <Text style={{
-                              fontSize: 12,color: profile.profile_type === 'business' ? '#FF984F' : '#252525',fontWeight: '600'}}>
+                              fontSize: 12,color: profile.profile_type === 'business' ? '#252525' : '#252525',fontWeight: '600'}}>
                               {profile.profile_type || 'Personal'}
                             </Text>
                           </View>

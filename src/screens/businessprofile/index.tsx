@@ -163,7 +163,7 @@ const BusinessProfile = ({ navigation }: BusinessProfileProps) => {
            formData.append('profile_type','business');
       formData.append('name',shopName.trim());
        formData.append('email',email.trim());
-        formData.append('contact',contact.trim());
+        formData.append('mobile',contact.trim());
          formData.append('bio',bio.trim());
               formData.append('address',address.trim());
 

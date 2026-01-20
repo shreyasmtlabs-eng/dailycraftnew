@@ -16,7 +16,7 @@ import styles from './styles';
 
 const images = [
   require('../../assets/images/posterimage.png'),
-  require('../../assets/images/image2recomd.jpg'),
+  require('../../assets/images/posterimage.png'),
   require('../../assets/images/recomdextraimage.jpg'),
 ];
 
