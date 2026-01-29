@@ -37,7 +37,7 @@ type HomeScreenProps = {
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 type CategoryType = {
-  id: string;
+  id: number;
   category_name: string;
 };
 
@@ -73,10 +73,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const activeProfileId = useSelector((state: RootState) => state.profile.activeProfileId);
   const isPremium = useSelector((state: RootState) => state.membership.isPremium);
   const token = useSelector((state: RootState) => state.auth.token);
-
   const [_networkError, setNetworkError] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<number | null>(null);
   const [categories, setCategories] = useState<CategoryType[]>([]);
   const [searchText, setSearchText] = useState('');
   const [allProfiles, setAllProfiles] = useState<ProfileItemType[]>([]);
@@ -89,6 +88,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [initialLoading, setInitialLoading] = useState(true);
   const [reload, setReload] = useState(0);
 
+
   const filteredTemplates = useMemo(() => {
     let result = [...Template];
 
@@ -100,7 +100,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
     if (activeCategory) {
       result = result.filter(t =>
-        t.category_id?.toString() === activeCategory
+        // t.category_id?.toString() === activeCategory
+        t.category_id === activeCategory
       );
     }
 
@@ -526,8 +527,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
           {loading ? (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-              <ActivityIndicator size="large" color="#000" />
-              <Text style={{ marginTop: 10, fontSize: 16 }}>Loading...</Text>
+              {/* <ActivityIndicator size="large" color="#000" /> */}
+              {/* <Text style={{ marginTop: 10, fontSize: 16 }}>Loading...</Text> */}
             </View>
           ) : filteredTemplates.length === 0 ? (
             <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 16}}>
@@ -556,10 +557,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <>
               {initialLoading && (
                 <View style={{ paddingVertical: 20, alignItems: 'center' }}>
-                  <ActivityIndicator size="small" color="#000" />
+                  {/* <ActivityIndicator size="small" color="#000" />
                   <Text style={{ marginTop: 1, fontSize: 12, color: '#666' }}>
                     Loading all templates...
-                  </Text>
+                  </Text> */}
                 </View>
               )}
               <FlatList
@@ -602,7 +603,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   );
                 }}
                 onMomentumScrollEnd={e => {
-                  const index = Math.round(e.nativeEvent.contentOffset.y / (SCREEN_HEIGHT * 0.7));
+                  const index = Math.round(e.nativeEvent.contentOffset.y / (SCREEN_HEIGHT * 0.6));
                   if (index >= 0 && index < filteredTemplates.length) {
                     currentIndex.current = index;
                   }
@@ -630,8 +631,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           </View>
 
           <Modal visible={isModalVisible} transparent animationType="slide">
+             <View style={{ flex: 1 }}>
             <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
               <View style={styles.modalOverlay} />
+
+
             </TouchableWithoutFeedback>
 
             <View style={styles.modalContainer}>
@@ -701,6 +705,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               >
                 <Text style={styles.createProfileText}>Create New Profile</Text>
               </TouchableOpacity>
+            </View>
             </View>
           </Modal>
         </View>

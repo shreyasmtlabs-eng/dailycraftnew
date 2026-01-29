@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -24,6 +25,7 @@ import { RootState } from '../../redux/store';
 import { CommonActions } from '@react-navigation/native';
 import { setActiveProfile } from '../../redux/slice/profile';
 
+
 type ProfileProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Profile'>;
 };
@@ -34,6 +36,8 @@ const Profile = ({ navigation }: ProfileProps) => {
   const [loading, setLoading] = useState(true);
   const [networkError, setNetworkError] = useState(false);
   const [deletemodalvisible, setDeleteModalVisible] = useState(false);
+  const [confirmmodal, setConfirmModal] = useState(false);
+  const [selectedprofile, setSelectedProfile] = useState<any>(null);
   const dispatch = useDispatch();
 
   const isPremium = useSelector((state: RootState) => state.membership.isPremium);
@@ -98,14 +102,11 @@ const Profile = ({ navigation }: ProfileProps) => {
     }
   };
 
-
-
   const handleDelete = () => {
     setDeleteModalVisible(true);
   };
 
   const handleDeleteProfile = (profileId: string, isPrimary: boolean) => {
-
     if (isPrimary) {
       Alert.alert(
         'Cannot Delete',
@@ -116,59 +117,60 @@ const Profile = ({ navigation }: ProfileProps) => {
       return;
     }
 
-    Alert.alert(
-      'Delete Profile',
-      'Are you sure you want to delete this profile?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              setLoading(true);
-              const response = await axiosInstance.delete(
-                `${API_ENDPOINTS.DELETE_PROFILE}${profileId}`
-              );
-
-              if (response.data?.status) {
-                Toast.show({
-                   type: 'success',
-                  text1: 'Profile deleted successfully',
-                });
-
-                const profilesRes = await axiosInstance.get(API_ENDPOINTS.GET_ALL_PROFILES);
-                const profiles = profilesRes.data?.data || [];
-
-                const sortedProfiles = [...profiles].sort((a, b) => {
-                  return (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0);
-                });
-
-                setAllProfiles(sortedProfiles);
-
-                if (sortedProfiles.length > 0) {
-                  const primaryProfile = sortedProfiles.find(p => p.is_primary) || sortedProfiles[0];
-
-                  dispatch(setActiveProfile(primaryProfile.id.toString()));
-                  await fetchProfileDetails(primaryProfile.id.toString());
-                } else {
-                  dispatch(clearProfile());
-                }
-              } else {
-                throw new Error('Delete failed');
-              }
-            } catch (err) {
-              console.log('Delete error:', err);
-              Toast.show({ type: 'error', text1: 'Failed to delete profile' });
-            } finally {
-              setLoading(false);
-              setDeleteModalVisible(false);
-            }
-          },
-        },
-      ]
-    );
+    const profile = allProfiles.find(p => p.id === profileId);
+    setSelectedProfile(profile);
+    setConfirmModal(true);
+    setDeleteModalVisible(false);
   };
+
+  const confirmDelete = async () => {
+    if (!selectedprofile)
+      { return;
+      }
+
+    try {
+      setLoading(true);
+      const response = await axiosInstance.delete(
+        `${API_ENDPOINTS.DELETE_PROFILE}${selectedprofile.id}`
+      );
+
+      if (response.data?.status) {
+        Toast.show({
+          type: 'success',
+          text1: 'Profile deleted successfully',
+        });
+
+        const profilesRes = await axiosInstance.get(API_ENDPOINTS.GET_ALL_PROFILES);
+        const profiles = profilesRes.data?.data || [];
+
+        const sortedProfiles = [...profiles].sort((a, b) => {
+          return (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0);
+        });
+
+        setAllProfiles(sortedProfiles);
+
+        if (sortedProfiles.length > 0) {
+          const primaryProfile = sortedProfiles.find(p => p.is_primary) || sortedProfiles[0];
+
+          dispatch(setActiveProfile(primaryProfile.id.toString()));
+          await fetchProfileDetails(primaryProfile.id.toString());
+        } else {
+          dispatch(clearProfile());
+        }
+      } else {
+        throw new Error('Delete failed');
+      }
+    } catch (err) {
+      console.log('Delete error:', err);
+      Toast.show({ type: 'error', text1: 'Failed to delete profile' });
+    } finally {
+      setLoading(false);
+      setConfirmModal(false);
+      setSelectedProfile(null);
+    }
+  };
+
+
 
   useEffect(() => {
     setLoading(true);
@@ -232,7 +234,7 @@ const Profile = ({ navigation }: ProfileProps) => {
                       key={profile.id}
                       style={[
                         styles.profileRow,
-                        profile.is_primary && { },
+                        profile.is_primary && {},
                       ]}
                       onPress={() => handleDeleteProfile(profile.id, profile.is_primary)}
                       disabled={profile.is_primary}
@@ -251,7 +253,8 @@ const Profile = ({ navigation }: ProfileProps) => {
                               </Text>
                             )}
                             <Text style={{
-                              fontSize: 12,color: profile.profile_type === 'business' ? '#252525' : '#252525',fontWeight: '600'}}>
+                              fontSize: 12, color: profile.profile_type === 'business' ? '#252525' : '#252525', fontWeight: '600'
+                            }}>
                               {profile.profile_type || 'Personal'}
                             </Text>
                           </View>
@@ -260,7 +263,7 @@ const Profile = ({ navigation }: ProfileProps) => {
 
                       {profile.is_primary ? (
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                         {/* <Ionicons name="lock-closed" size={18} color="#999" /> */}
+                          {/* <Ionicons name="lock-closed" size={18} color="#999" /> */}
                           {/* <Text style={{ fontSize: 12, color: '#999', marginLeft: 4 }}>Locked</Text> */}
                         </View>
                       ) : (
@@ -276,6 +279,53 @@ const Profile = ({ navigation }: ProfileProps) => {
                 >
                   <Text style={styles.modalCloseText}>Close</Text>
                 </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+
+          <Modal
+            visible={confirmmodal}
+            animationType="fade"
+            transparent={true}
+            onRequestClose={() => {
+              setConfirmModal(false);
+              setSelectedProfile(null);
+            }}
+          >
+            <View style={styles.modalContainer}>
+              <View style={styles.confirmationModalContent}>
+                <View style={styles.confirmationHeader}>
+                  <Ionicons name="warning" size={40} color="#ff914d" />
+                  <Text style={styles.confirmationTitle}>Delete Profile</Text>
+                </View>
+
+                <Text style={styles.confirmationMessage}>
+                  Are you sure you want to delete{' '}
+                  <Text style={{ fontWeight: 'bold' }}>{selectedprofile?.name}</Text>'s profile?
+                </Text>
+
+                <Text style={styles.confirmationSubtext}>
+                  This action cannot be undone. All data associated with this profile will be permanently removed.
+                </Text>
+
+                <View style={styles.confirmationButtonsContainer}>
+                  <TouchableOpacity
+                    style={[styles.confirmationButton, styles.cancelButton]}
+                    onPress={() => {
+                      setConfirmModal(false);
+                      setSelectedProfile(null);
+                    }}
+                  >
+                    <Text style={styles.cancelButtonText}>Cancel</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.confirmationButton, styles.deleteButton]}
+                    onPress={confirmDelete}
+                  >
+                    <Text style={styles.deleteButtonText}>Delete</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           </Modal>
@@ -306,9 +356,8 @@ const Profile = ({ navigation }: ProfileProps) => {
                   {profileData?.is_primary && (
                     <View style={{
                       flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4,
-                    borderRadius: 6,marginTop: 4, alignSelf: 'flex-start'}}>
-{/*
-                      <Ionicons name="star" size={12} color="#000" /> */}
+                      borderRadius: 6, marginTop: 4, alignSelf: 'flex-start'
+                    }}>
                       <Text style={{ color: '#000', fontSize: 11, fontWeight: '600', marginLeft: 4 }}>
                         Primary Profile
                       </Text>

@@ -8,7 +8,7 @@ export default StyleSheet.create({
   container: {
     backgroundColor:color.contiuetext,
     paddingHorizontal: px(dw * 0.05),
-    paddingTop: px(dw * 0.04),
+    paddingTop: px(dw * 0.09),
   },
 
   header: {
@@ -48,17 +48,19 @@ export default StyleSheet.create({
     // padding: px(dw * 0.01),
     marginVertical: px(dw * 0.055),
     marginBottom: px(dw * 0.01),
-    height: px(dw * 0.35),
+    height: px(dw * 0.33),
     // backgroundColor:'red',
   },
 
   logoText: {
-    color: color.logotext,
-    marginVertical: px(dw * 0.05),
+    // color: color.logotext,
+    color: color.carddes,
+    // marginVertical: px(dw * 0.05),
     fontSize: px(dw * 0.03),
     alignSelf: 'center',
     fontFamily:FONT.REGULAR,
     lineHeight:px(15),
+      marginBottom: px(10),
   },
 
   textlarge: {
@@ -69,9 +71,14 @@ export default StyleSheet.create({
 
   uploadBtn: {},
 
-  uploadimageicon: {
-     marginTop: px(dw * 0.08),
-  },
+uploadimageicon: {
+  width: px(22),
+  height: px(22),
+  resizeMode: 'contain',
+  marginTop: px(4),
+  marginBottom: px(8),
+},
+
 
   uploadIcon: {
 
@@ -144,10 +151,12 @@ export default StyleSheet.create({
   },
 
   emptyBox: {
-    flex: 1,
+    // flex: 1,
+      width: '70%',
+  height: '70%',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: px(dw * 0.02),
+    // padding: px(dw * 0.02),
   },
 
   uploadIconImage: {},
@@ -159,7 +168,7 @@ export default StyleSheet.create({
     gap: px(3),
     // marginTop: px(dw * 0.01),
     width: px(dw * 0.3),
-        marginBottom: px(dw * 0.03),
+        marginBottom: px(dw * 0.01),
   },
 
   pickBtn: {
@@ -169,7 +178,7 @@ export default StyleSheet.create({
     paddingVertical: px(dw * 0.02),
     paddingHorizontal: px(dw * 0.02),
     borderRadius: px(dw * 0.02),
-      marginBottom: px(dw * 0.07),
+      // marginBottom: px(dw * 0.07),
   },
 
   pickTxt: {

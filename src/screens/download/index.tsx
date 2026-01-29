@@ -18,6 +18,8 @@ import axiosInstance from '../../services/axiousinstance';
 import { API_ENDPOINTS } from '../../services/endpoints';
 import { downloadImage } from '../../component/Downloadhelper';
 
+import { px } from '../../utils/dimensions';
+
 type TemplateItem = {
   file_path: string;
   template_name?: string;
@@ -85,7 +87,7 @@ const Download = () => {
 
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 160 }}
+          contentContainerStyle={{ paddingBottom: px(100) }}
         >
           {/* <View style={styles.header}>
             <Text style={styles.title}>All Downloads</Text>

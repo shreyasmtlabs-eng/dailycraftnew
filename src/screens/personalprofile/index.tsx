@@ -19,11 +19,9 @@ import Button from '../../component/button';
 import ImagePicker from 'react-native-image-crop-picker';
 import { RootStackParamList } from '../../navigation/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootState } from '../../redux/store';
 import { useDispatch,useSelector } from 'react-redux';
 import { setIsRegister } from '../../redux/slice/profile';
-// import { updateUser } from '../../redux/slice/auth';
 import axiosInstance from '../../services/axiousinstance';
 import { API_ENDPOINTS } from '../../services/endpoints';
 import Toast from 'react-native-toast-message';
@@ -156,8 +154,6 @@ formData.append('mobile', contact.trim());
 formData.append('bio',bio.trim());
 formData.append('profile_type','personal');
 
-//  const user_id = await AsyncStorage.getItem('user_id');
-//     formData.append('user_id', user_id || '');
 
 formData.append('user_id', userId || '');
 
@@ -204,11 +200,6 @@ if(data?.status){
  console.log('Dispatching setIsRegister(true)');
 
  dispatch(setIsRegister(true));
-// dispatch(
-//     updateUser({
-//       is_register: true,
-//     })
-  // );
  navigation.navigate('MainTabs');
     } else {
       Toast.show({
@@ -268,7 +259,7 @@ const toTitleCase = (text: string) => {
               ) : (
                 <View style={styles.emptyBox}>
                   <Image
-                    source={require('../../assets/images/uploadicon.png')}
+                    source={require('../../assets/images/uploadicons.png')}
                     style={styles.uploadimageicon}
                   />
                   <Text style={styles.logoText}>Please Upload {'\n'}A Profile Picture</Text>

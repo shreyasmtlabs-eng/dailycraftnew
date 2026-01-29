@@ -6,6 +6,7 @@ import color from '../../constant/color';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginTop:px(15),
   },
   backgroundImage: {
     // width: deviceWidth,

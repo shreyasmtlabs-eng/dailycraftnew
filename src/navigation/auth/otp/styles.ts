@@ -26,6 +26,7 @@ export default StyleSheet.create({
 
   backBtn: {
     justifyContent: 'center',
+    marginTop:px(10),
     alignItems: 'center',
     height: deviceWidth * 0.1,
     width: deviceWidth * 0.1,
@@ -65,6 +66,7 @@ export default StyleSheet.create({
     marginTop: deviceHeight * 0.05,
     marginLeft:px(10),
 marginRight:px(10),
+
   },
 
   otpBox: {
@@ -83,7 +85,7 @@ marginRight:px(10),
     textAlign: 'center',
     color: color.carddes,
     fontSize: deviceWidth * 0.035,
-    marginTop: deviceHeight * 0.02,
+    marginTop: deviceHeight * 0.01,
     fontFamily:FONT.MEDIUM,
   },
 
@@ -95,14 +97,15 @@ marginRight:px(10),
 
   verifyButton: {
     position: 'absolute',
-    bottom: deviceHeight * 0.04,
+    bottom: deviceHeight * 0.01,
     alignSelf: 'center',
     width: deviceWidth * 0.9,
     backgroundColor: color.backbtn,
     paddingVertical: deviceWidth * 0.035,
     borderRadius: deviceWidth * 0.02,
-     marginBottom: deviceHeight * 0.02,
+     marginBottom: deviceHeight * 0.01,
   },
+
 
   verifyButtonText: {
     textAlign: 'center',

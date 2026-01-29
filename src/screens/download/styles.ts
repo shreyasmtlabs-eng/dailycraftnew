@@ -8,7 +8,8 @@ const ITEM_SIZE = (deviceWidth - ITEM_MARGIN * 3) / 2;
 
 const styles = StyleSheet.create({
   container: {
-    // flex: 1,
+    flex: 1,
+     marginTop: px(13),
   },
   backgroundImage: {
     width: deviceWidth,
@@ -22,7 +23,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: px(28),
-    marginTop: px(5),
+    marginTop: px(10),
 fontFamily:FONT.BOLD,
     textAlign: 'center',
   },

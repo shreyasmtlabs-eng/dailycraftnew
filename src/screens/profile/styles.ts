@@ -7,7 +7,10 @@ import color from '../../constant/color';
 const FOOTER_BUTTON_WIDTH = (deviceWidth - px(60)) / 2;
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1,
+marginTop:px(20),
+  },
+
   backgroundImage: { width: deviceWidth, height: '100%' },
 
   headerContainer: { alignItems: 'center', marginTop: px(15) },
@@ -162,6 +165,76 @@ modalCloseText: {
   fontSize: 16,
   fontWeight: 'bold',
   color: '#ff914d',
+},
+confirmationModalContent: {
+  backgroundColor: 'white',
+  borderRadius: 20,
+  padding: 24,
+  width: '85%',
+  alignItems: 'center',
+  shadowColor: '#000',
+  shadowOffset: {
+    width: 0,
+    height: 2,
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 4,
+  elevation: 5,
+},
+confirmationHeader: {
+  alignItems: 'center',
+  marginBottom: 16,
+},
+confirmationTitle: {
+  fontSize: 20,
+  fontWeight: 'bold',
+  color: '#333',
+  marginTop: 12,
+},
+confirmationMessage: {
+  fontSize: 16,
+  color: color.textPrimary,
+  textAlign: 'center',
+  marginBottom: 8,
+  lineHeight: 22,
+},
+confirmationSubtext: {
+  fontSize: 13,
+  color: color.textPrimary,
+  textAlign: 'center',
+  marginBottom: 24,
+  lineHeight: 18,
+},
+confirmationButtonsContainer: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  width: '100%',
+  gap: 12,
+},
+confirmationButton: {
+  flex: 1,
+  paddingVertical: 14,
+  borderRadius: 10,
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+cancelButton: {
+  backgroundColor: '#f5f5f5',
+  borderWidth: 1,
+  borderColor: '#ddd',
+},
+deleteButton: {
+  backgroundColor: color.primary,
+},
+cancelButtonText: {
+  color: '#333',
+  fontSize: 16,
+  fontWeight: '600',
+},
+deleteButtonText: {
+  color: 'white',
+  fontSize: 16,
+  fontWeight: '600',
 },
 
 });

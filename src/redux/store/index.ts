@@ -7,6 +7,7 @@ import membershipReducer from '../slice/membershipSlice';
 import profileReducer from '../slice/profile';
 import authReducer from '../slice/auth';
 
+
 const rootReducer = combineReducers({
   auth: authReducer,
     membership: membershipReducer,

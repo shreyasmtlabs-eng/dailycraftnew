@@ -1,5 +1,4 @@
 
-
 import { StyleSheet } from 'react-native';
 import { deviceHeight as dh, deviceWidth as dw, px } from '../../utils/dimensions';
 import { FONT } from '../../assets/fonts';
@@ -22,7 +21,7 @@ export default StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: dw * 0.06,
-    paddingTop: dh * 0.04,
+    paddingTop: dh * 0.05,
 
   },
 
@@ -35,6 +34,7 @@ export default StyleSheet.create({
     backgroundColor: color.backbtn,
     borderWidth: px(2),
     borderColor: color. background,
+
   },
 
   banner: {

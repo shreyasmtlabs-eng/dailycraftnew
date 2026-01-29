@@ -7,7 +7,7 @@ export default StyleSheet.create({
 
   container: {
     flex: 1,
-    paddingTop: 20,
+    paddingTop: px(15),
 
   },
 
@@ -25,6 +25,7 @@ export default StyleSheet.create({
     marginBottom: px(15),
     marginRight: px(19),
     marginLeft: px(10),
+    marginTop:px(15),
 
 
   },
@@ -177,16 +178,15 @@ width: px(42),
     bottom: 0,
     left: px(10),
     right: px(10),
-    height: px(80),
+    height: px(79),
     borderRadius: px(50),
     backgroundColor: color.secondary,
-      // backgroundColor:'red',
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
     borderTopWidth: 1,
     borderTopColor: color.borderTopColor,
-    marginBottom: px(5),
+    marginBottom: px(8),
   },
   navItem: {
     alignItems: 'center',
@@ -261,9 +261,11 @@ width: px(42),
   navIconWrapper: {
     justifyContent: 'center',
     alignItems: 'center',
-    width: px(26),
-    height: px(26),
+    width: px(50),
+    height: px(46),
     borderRadius: px(26),
+
+
   },
   activeNavCircle: {
     backgroundColor: color. primary,
@@ -271,21 +273,22 @@ width: px(42),
     borderRadius: px(45),
     padding: px(10),
     width: px(50),
-    height: px(50),
+    // height: px(50),
   },
 
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.3)',
-    padding: px(20),
+    // // padding: px(20),
   },
   modalContainer: {
     position: 'absolute',
     bottom: 0,
     width: deviceWidth,
-      maxHeight: deviceHeight * 0.8,
+  maxHeight: deviceHeight * 0.8,
   minHeight: deviceHeight * 0.3,
-    backgroundColor: 'rgba(255,255,255,0.95)',
+    // backgroundColor: 'rgba(255,255,255,0.95)',
+    backgroundColor: '#FFFFFF',
     borderTopLeftRadius: px(20),
     borderTopRightRadius: px(20),
     paddingHorizontal: px(20),
@@ -293,6 +296,15 @@ width: px(42),
     padding: px(60),
 
 paddingBottom: px(20),
+ shadowColor: '#000',
+  shadowOffset: {
+    width: 0,
+    height: -2,
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 3.84,
+  elevation: 5,
+
 
   },
   modalHeader: {
@@ -346,7 +358,7 @@ paddingBottom: px(20),
     borderRadius: px(12),
   },
   proimage:{
-width: px(48),
+    width: px(48),
     height: px(48),
     borderColor: color.primary,
     borderRightWidth: px(5),
@@ -407,7 +419,7 @@ width: px(48),
   templateContainer: {
     alignItems: 'center',
   // marginHorizontal: px(10),
-  paddingTop:0,
+  paddingTop:10,
   },
   templateImage: {
       width: deviceWidth - px(30),
@@ -417,10 +429,7 @@ width: px(48),
   resizeMode: 'contain',
   borderRadius: px(10),
   backgroundColor: '#f5f5f5',
-
-
-
-  marginTop: px(10),
+  // marginTop: px(10),
    marginLeft:px(15),
     marginRight:px(15),
     // marginBottom:px(2),

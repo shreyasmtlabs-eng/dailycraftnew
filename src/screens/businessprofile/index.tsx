@@ -327,7 +327,7 @@ const toTitleCase = (text: string) => {
               ) : (
                 <View style={styles.emptyBox}>
                   <Image
-                    source={require('../../assets/images/uploadicon.png')}
+                    source={require('../../assets/images/uploadicons.png')}
                     style={styles.uploadimageicon}
                     resizeMode="contain"
                   />

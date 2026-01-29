@@ -1,10 +1,12 @@
 import { FONT } from './../../assets/fonts/index';
 import { StyleSheet } from 'react-native';
 import color from '../../constant/color';
+import { px } from '../../utils/dimensions';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     // backgroundColor: '#fff',
+    marginTop:px(28),
   },
     backgroundImage: {
   // flex: 1,

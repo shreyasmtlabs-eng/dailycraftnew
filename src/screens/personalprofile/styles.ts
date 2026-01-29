@@ -1,5 +1,4 @@
 
-
 import { StyleSheet } from 'react-native';
 import { deviceWidth, px } from '../../utils/dimensions';
 import { FONT } from '../../assets/fonts';
@@ -8,8 +7,9 @@ export default StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: color.downloadtext,
+    // backgroundColor:color.secondary,
     paddingHorizontal: px(20),
-    // paddingTop: px(15),
+    paddingTop: px(21),
   },
 
   header: {
@@ -38,7 +38,7 @@ export default StyleSheet.create({
   },
 
   logoBox: {
-    marginTop: px(20),
+    marginTop: px(16),
     alignSelf: 'center',
     width: deviceWidth * 0.45,
     aspectRatio: 1,
@@ -48,14 +48,15 @@ export default StyleSheet.create({
     borderStyle: 'dashed',
     borderColor: color.logobox,
     borderRadius: px(20),
-    padding: px(5),
+    padding: px(6),
     marginVertical: px(25),
     marginBottom: px(10),
     height: deviceWidth * 0.37,
   },
 
   logoText: {
-    color: color.logotext,
+    // color: color.logotext,
+     color: color.carddes,
     marginVertical: px(15),
     fontSize: px(12),
     textAlign: 'center',
@@ -120,15 +121,21 @@ export default StyleSheet.create({
     marginTop: px(15),
   },
 
-  uploadimageicon: {
-    paddingTop: px(5),
-  },
+
+uploadimageicon: {
+  width: deviceWidth * 0.06,
+  height: deviceWidth * 0.06,
+  resizeMode: 'contain',
+  marginBottom: px(2),
+  marginTop:px(7),
+},
+
 
   emptyBox: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: px(10),
+    padding: px(6),
   },
 
   uploadIconImage: {},
@@ -139,14 +146,16 @@ export default StyleSheet.create({
     alignItems: 'center',
     gap: px(5),
     width: deviceWidth * 0.3,
-     marginBottom:px(5),
+     marginBottom:px(8),
+     marginTop:px(2),
+
   },
 
   pickBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: color.backbtn,
-    paddingVertical: px(10),
+    paddingVertical: px(6),
     paddingHorizontal: px(4),
     borderRadius: px(10),
     // marginBottom:px(5),
@@ -154,7 +163,7 @@ export default StyleSheet.create({
 
   pickTxt: {
     color: color.contiuetext,
-    marginLeft: px(5),
+    marginLeft: px(6),
     fontSize: px(12),
     fontWeight: '500',
   },

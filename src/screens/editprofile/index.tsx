@@ -53,7 +53,9 @@ const EditProfile = ({ navigation }: EditProfileProps) => {
       setLoading(true);
       setNetworkError(false);
 
-      if (!activeProfileId) return;
+      if (!activeProfileId){
+return;
+      }
 
       const response = await axiosInstance.get(
         `${API_ENDPOINTS.GET_DETAILS}${activeProfileId}`
@@ -109,7 +111,9 @@ const EditProfile = ({ navigation }: EditProfileProps) => {
 
   const handleUpdateProfile = async () => {
     try {
-      if (!activeProfileId) return;
+      if (!activeProfileId){
+ return;
+      }
 
       setLoading(true);
 

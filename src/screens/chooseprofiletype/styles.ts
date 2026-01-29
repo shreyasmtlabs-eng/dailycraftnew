@@ -30,6 +30,7 @@ export default StyleSheet.create({
     backgroundColor: color.backbtn,
     borderWidth: px(2),
     borderColor: color.background,
+
   },
 
   banner: {
