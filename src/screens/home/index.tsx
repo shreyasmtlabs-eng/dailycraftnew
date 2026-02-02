@@ -14,6 +14,7 @@ import {
   Dimensions,
   Keyboard,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { Buffer } from 'buffer';
 import Ionicons from '@react-native-vector-icons/ionicons';
@@ -87,6 +88,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [loadingIndex, setLoadingIndex] = useState<number | null>(null);
   const [initialLoading, setInitialLoading] = useState(true);
   const [reload, setReload] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+const prevProfileId = useRef<string | null>(null);
 
 
   const filteredTemplates = useMemo(() => {
@@ -315,6 +318,42 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }
   };
 
+
+const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+
+     try {
+      setRenderTemplate([]);
+      setTemplate([]);
+
+      await Promise.all([
+        fetchCategories(),
+        fetchAllProfiles(),
+        fetchAllTemplates(),
+      ]);
+
+      setSearchText('');
+      setActiveCategory(null);
+
+      currentIndex.current = 0;
+      flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+      Toast.show({
+        type: 'success',
+        text1: 'Refreshed',
+        text2: 'Home screen data has been refreshed',
+      });
+    } catch (error) {
+      console.log('Refresh error:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Refresh Failed',
+        text2: 'Failed to refresh data',
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
+
   useEffect(() => {
     const init = async () => {
       setLoading(true);
@@ -326,27 +365,55 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     init();
   }, []);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      if (!activeProfileId) {
-        return;
-      }
-      const reloadTemplates = async () => {
-              await fetchAllProfiles();
-        fetchProfileDetails(activeProfileId);
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     if (!activeProfileId) {
+  //       return;
+  //     }
+  //     const reloadTemplates = async () => {
+  //             await fetchAllProfiles();
+  //       fetchProfileDetails(activeProfileId);
 
-        if (Template.length > 0) {
-          setRenderTemplate(prev => prev.map(t => ({ ...t, image_url: undefined })));
+  //       if (Template.length > 0) {
+  //         setRenderTemplate(prev => prev.map(t => ({ ...t, image_url: undefined })));
 
-          currentIndex.current = 0;
-          flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+  //         currentIndex.current = 0;
+  //         flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
 
-          setReload(prev => prev + 1);
-        }
-      };
-      reloadTemplates();
-    }, [activeProfileId])
-  );
+  //         setReload(prev => prev + 1);
+  //       }
+  //     };
+  //     reloadTemplates();
+  //   }, [activeProfileId])
+  // );
+
+
+useFocusEffect(
+  React.useCallback(() => {
+      fetchAllProfiles();
+    if (!activeProfileId) return;
+  fetchProfileDetails(activeProfileId);
+
+    if (prevProfileId.current !== activeProfileId) {
+      prevProfileId.current = activeProfileId;
+
+      fetchProfileDetails(activeProfileId);
+
+
+      setRenderTemplate(prev =>
+        prev.map(t => ({ ...t, image_url: undefined }))
+      );
+
+      currentIndex.current = 0;
+      flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+
+      setReload(prev => prev + 1);
+    }
+
+  }, [activeProfileId])
+);
+
+
 
   useEffect(() => {
     if (filteredTemplates.length > 0 && activeProfileId && reload > 0) {
@@ -534,7 +601,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 16}}>
               <Text style={{ fontSize: 16, color: '#666', textAlign: 'center' }}>
                 {searchText
-                  ? `No templates found`
+                  ? 'No templates found'
                   : activeCategory
                   ? `No templates found in "${categories.find(c => c.id === activeCategory)?.category_name}"`
                   : 'No templates available'}
@@ -571,16 +638,27 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 contentContainerStyle={{
                   paddingBottom: px(100),
                 }}
+                  ItemSeparatorComponent={() => <View style={{ height: px(14) }} />}
+                  refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    colors={['#FF7F32']}
+                    tintColor="#FF7F32"
+                    title="Pull to refresh"
+                    titleColor="#666"
+                  />
+                }
                 renderItem={({ item, index }) => {
                   const existingItem = renderTemplate.find(t => t.id === item.id);
                   const imageUrl = existingItem?.image_url;
                   const isLoading = loadingIndex === index && !imageUrl && !initialLoading;
 
                   return (
-                    <View style={{  justifyContent: 'center', alignItems: 'center', minHeight: SCREEN_HEIGHT * 0.7 }}>
+                    <View style={{  justifyContent: 'center', alignItems: 'center', minHeight: SCREEN_HEIGHT * 0.4 }}>
                       {isLoading ? (
                         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                          <ActivityIndicator size="large" color="#000" />
+                          {/* <ActivityIndicator size="large" color="#000" /> */}
                           <Text style={{ marginTop: 5}}>Loading template...</Text>
                         </View>
                       ) : imageUrl ? (
@@ -591,8 +669,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                         />
                       ) : initialLoading ? (
                         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                          {/* <ActivityIndicator size="small" color="#000" /> */}
-                          {/* <Text style={{ marginTop: 5 }}>Loading...</Text> */}
+                          {/* <ActivityIndicator size="small" color="#000" />
+                           <Text style={{ marginTop: 5 }}>Loading...</Text> */}
                         </View>
                       ) : (
                         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
@@ -630,7 +708,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             )}
           </View>
 
-          <Modal visible={isModalVisible} transparent animationType="slide">
+          <Modal visible={isModalVisible} transparent animationType="slide"   statusBarTranslucent>
              <View style={{ flex: 1 }}>
             <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
               <View style={styles.modalOverlay} />
@@ -708,6 +786,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             </View>
             </View>
           </Modal>
+
         </View>
       </ImageBackground>
     </TouchableWithoutFeedback>

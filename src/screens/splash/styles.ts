@@ -7,6 +7,7 @@ const styles = StyleSheet.create({
     margin: 0,
     padding: 0,
   },
+
   rowBox: {
     width: '100%',
     justifyContent: 'center',

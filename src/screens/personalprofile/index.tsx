@@ -46,9 +46,6 @@ const PersonalProfile: React.FC<Props> = ({ navigation }) => {
   });
 
   const slideAnim = useState(new Animated.Value(0))[0];
-
-
-
   const openPickerSheet = () => {
     setPickerVisible(true);
     Animated.timing(slideAnim, {
@@ -273,7 +270,7 @@ const toTitleCase = (text: string) => {
               )}
             </TouchableOpacity>
 
-            <Modal visible={pickerVisible} transparent animationType="fade" onRequestClose={closePickerSheet}>
+            <Modal visible={pickerVisible} transparent animationType="fade" statusBarTranslucent onRequestClose={closePickerSheet}>
               <TouchableOpacity
                 style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' }}
                 activeOpacity={1}
@@ -282,7 +279,7 @@ const toTitleCase = (text: string) => {
                 <Animated.View
                   style={{
                     backgroundColor: '#fff',
-                    paddingTop: 15,
+                     paddingTop: 15,
                     // paddingBottom: 30,
                     paddingHorizontal: 20,
                     borderTopLeftRadius: 20,
@@ -293,7 +290,6 @@ const toTitleCase = (text: string) => {
                   <Text style={{ textAlign: 'center', fontSize: 18, fontWeight: '600', marginBottom: 18 }}>
                     Select Image
                   </Text>
-
                   <TouchableOpacity
                     style={styles.sheetBtn}
                     onPress={() => {

@@ -11,6 +11,7 @@ export default StyleSheet.create({
     paddingTop: px(dw * 0.09),
   },
 
+
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -35,7 +36,6 @@ export default StyleSheet.create({
   },
 
   logoBox: {
-    // marginTop: px(dw * 0.04),
     alignSelf: 'center',
     width: '35%',
     aspectRatio: 1,
@@ -45,17 +45,13 @@ export default StyleSheet.create({
     borderStyle: 'dashed',
     borderColor: color.logobox,
     borderRadius: px(dw * 0.05),
-    // padding: px(dw * 0.01),
     marginVertical: px(dw * 0.055),
     marginBottom: px(dw * 0.01),
     height: px(dw * 0.33),
-    // backgroundColor:'red',
   },
 
   logoText: {
-    // color: color.logotext,
     color: color.carddes,
-    // marginVertical: px(dw * 0.05),
     fontSize: px(dw * 0.03),
     alignSelf: 'center',
     fontFamily:FONT.REGULAR,
@@ -151,12 +147,10 @@ uploadimageicon: {
   },
 
   emptyBox: {
-    // flex: 1,
       width: '70%',
   height: '70%',
     justifyContent: 'center',
     alignItems: 'center',
-    // padding: px(dw * 0.02),
   },
 
   uploadIconImage: {},
@@ -166,7 +160,6 @@ uploadimageicon: {
     justifyContent: 'center',
     alignItems: 'center',
     gap: px(3),
-    // marginTop: px(dw * 0.01),
     width: px(dw * 0.3),
         marginBottom: px(dw * 0.01),
   },
@@ -178,12 +171,12 @@ uploadimageicon: {
     paddingVertical: px(dw * 0.02),
     paddingHorizontal: px(dw * 0.02),
     borderRadius: px(dw * 0.02),
-      // marginBottom: px(dw * 0.07),
+
   },
 
   pickTxt: {
     color: color.contiuetext,
-    // marginLeft: px(1),
+
     fontSize: px(dw * 0.03),
     fontWeight: '500',
   },

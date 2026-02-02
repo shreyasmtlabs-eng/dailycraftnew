@@ -26,7 +26,6 @@ type EditProfileProps = {
 };
 
 const EditProfile = ({ navigation }: EditProfileProps) => {
-  // const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [networkError, setNetworkError] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -129,13 +128,7 @@ return;
         formData.append('address', address || '');
       }
 
-      // if (selectedImage && !selectedImage.startsWith('http')) {
-      //   formData.append('avatar', {
-      //     uri: selectedImage,
-      //     type: 'image/jpeg',
-      //     name: `avatar_${Date.now()}.jpg`,
-      //   } as any);
-      // }
+
 
 if (selectedImage) {
   if (selectedImage.startsWith('http')) {

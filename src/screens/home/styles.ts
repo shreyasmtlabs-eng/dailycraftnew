@@ -279,8 +279,9 @@ width: px(42),
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.3)',
-    // // padding: px(20),
   },
+
+
   modalContainer: {
     position: 'absolute',
     bottom: 0,
@@ -304,8 +305,6 @@ paddingBottom: px(20),
   shadowOpacity: 0.25,
   shadowRadius: 3.84,
   elevation: 5,
-
-
   },
   modalHeader: {
     flexDirection: 'row',

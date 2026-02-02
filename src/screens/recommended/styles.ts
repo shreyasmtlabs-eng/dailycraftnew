@@ -9,20 +9,16 @@ const styles = StyleSheet.create({
     marginTop:px(15),
   },
   backgroundImage: {
-    // width: deviceWidth,
-    // height: deviceHeight,
-    // borderRadius: px(8),
+
       flex: 1,
   },
   contentContainer: {
     alignItems: 'center',
-    // justifyContent: 'center',
-    //  justifyContent: 'flex-start',
-    // padding: px(10),
+
   },
   header: {
     alignItems: 'center',
-    marginTop: px(15),
+    marginTop: px(16),
     marginBottom: px(20),
   },
   title: {
@@ -43,11 +39,6 @@ const styles = StyleSheet.create({
      fontFamily:FONT. REGULAR,
   },
   imageWrapper: {
-//     borderRadius: px(15),
-//     // overflow: 'hidden',
-// // backgroundColor:'red',
-// marginBottom:1,
-// height:px(470),
 
   width: deviceWidth,
   height: px(470),
@@ -68,7 +59,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     // width: deviceWidth * 1,
     width : px(200),
-    marginTop: px(15),
+    marginTop: px(12),
   },
   downloadBtn: {
     flex: 1,

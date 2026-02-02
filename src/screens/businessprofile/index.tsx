@@ -25,8 +25,7 @@ import Toast from 'react-native-toast-message';
 import { useDispatch,useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import { setIsRegister } from '../../redux/slice/profile';
-// import { updateUser } from '../../redux/slice/auth';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
+
 type BusinessProfileProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'BusinessProfile'>;
 };
@@ -160,16 +159,14 @@ const BusinessProfile = ({ navigation }: BusinessProfileProps) => {
 
     try{
       const formData = new FormData();
-           formData.append('profile_type','business');
+      formData.append('profile_type','business');
       formData.append('name',shopName.trim());
-       formData.append('email',email.trim());
-        formData.append('mobile',contact.trim());
-         formData.append('bio',bio.trim());
-              formData.append('address',address.trim());
+      formData.append('email',email.trim());
+      formData.append('mobile',contact.trim());
+      formData.append('bio',bio.trim());
+      formData.append('address',address.trim());
 
 
-  // const user_id = await AsyncStorage.getItem('user_id');
-    // formData.append('user_id', user_id || '');
 
 formData.append('user_id', userId || '');
 
@@ -213,14 +210,9 @@ formData.append('user_id', userId || '');
   }
 
 
-    console.log('Dispatching setIsRegister(true)');
-
+  console.log('Dispatching setIsRegister(true)');
   dispatch(setIsRegister(true));
-  // dispatch(
-  //   updateUser({
-  //     is_register: true,
-  //   })
-  // );
+
 
             navigation.navigate('MainTabs');
                 } else {
@@ -346,6 +338,7 @@ const toTitleCase = (text: string) => {
                     visible={pickerVisible}
                     transparent
                     animationType="fade"
+                    statusBarTranslucent
                     onRequestClose={closePickerSheet}>
                     <TouchableOpacity
                       activeOpacity={1}

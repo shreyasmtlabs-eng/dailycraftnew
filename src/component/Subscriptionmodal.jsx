@@ -123,7 +123,7 @@ overlay: {
 
   centerWrap: {
     position: 'absolute',
-    top: deviceHeight * 0.07,
+    top: deviceHeight * 0.04,
     width: deviceWidth * 0.93,
     alignSelf: 'center',
   },
@@ -204,7 +204,7 @@ overlay: {
   paymentWrap: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: px(12),
+    marginTop: px(10),
   },
 
   payOptionRow: {
@@ -241,7 +241,7 @@ payIcon: {
   },
 
   subscribeBtn: {
-    marginTop: px(18),
+    marginTop: px(15),
     backgroundColor: '#FF7F32',
     paddingVertical: px(14),
     borderRadius: px(10),
@@ -262,7 +262,7 @@ payIcon: {
   },
 
   closebtw: {
-    marginTop: px(5),
+    marginTop: px(7),
     paddingVertical: px(5),
     paddingHorizontal:px(4),
     borderRadius: px(10),

@@ -55,7 +55,6 @@ export default StyleSheet.create({
   },
 
   logoText: {
-    // color: color.logotext,
      color: color.carddes,
     marginVertical: px(15),
     fontSize: px(12),

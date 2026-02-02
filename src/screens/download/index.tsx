@@ -89,15 +89,10 @@ const Download = () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: px(100) }}
         >
-          {/* <View style={styles.header}>
-            <Text style={styles.title}>All Downloads</Text>
-            <Text style={styles.subtitle}>
-              Browse all your saved posters and download them anytime.
-            </Text>
-          </View> */}
+
 
           {loading && !networkError && (
-            <ActivityIndicator size="large" color="#fff" style={{ marginTop: 40 }} />
+            <ActivityIndicator size="large" color="#000" style={{ marginTop: 40 }} />
           )}
 
              {!loading && networkError && (
@@ -105,7 +100,7 @@ const Download = () => {
               style={{
                 marginTop: 40,
                 textAlign: 'center',
-                color: '#fff',
+                color: '#000',
                 fontSize: 16,
               }}
             >
