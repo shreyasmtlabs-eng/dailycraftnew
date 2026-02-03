@@ -16,7 +16,11 @@ export type RootStackParamList = {
 
 export type AuthStackParamList = {
   Login: undefined;
-  Otp: { mobile: string };
+  Otp: { mobile: string,
+     otp?: any;
+
+  };
+
    ChooseLanguage:undefined,
     ChooseProfileType : undefined,
   MainTabs:undefined,

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useCallback } from 'react';
 import {
   View,
   Text,
@@ -47,7 +47,7 @@ const EditProfile = ({ navigation }: EditProfileProps) => {
 
   const isBusiness = _profiletype === 'business';
 
-  const fetchProfileDetails = async () => {
+  const fetchProfileDetails = useCallback(async () => {
     try {
       setLoading(true);
       setNetworkError(false);
@@ -81,11 +81,11 @@ return;
     } finally {
       setLoading(false);
     }
-  };
+  },[activeProfileId]);
 
   useEffect(() => {
     fetchProfileDetails();
-  }, [activeProfileId]);
+  }, [activeProfileId,fetchProfileDetails]);
 
   const handleImagePick = () => {
     ImagePicker.openPicker({
@@ -103,9 +103,9 @@ return;
 
   };
 
-    useEffect(() => {
-    fetchProfileDetails();
-  }, [activeProfileId]);
+  //   useEffect(() => {
+  //   fetchProfileDetails();
+  // }, [activeProfileId]);
 
 
   const handleUpdateProfile = async () => {

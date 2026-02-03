@@ -1,6 +1,6 @@
 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useCallback } from 'react';
 import {
   View,
   Text,
@@ -51,7 +51,7 @@ const Profile = ({ navigation }: ProfileProps) => {
     console.log('profile state:', profileState);
   }, [token, profileState]);
 
-  const fetchProfileDetails = async (profileId?: string) => {
+  const fetchProfileDetails = useCallback(async (profileId?: string) => {
     setLoading(true);
     setNetworkError(false);
 
@@ -79,9 +79,9 @@ const Profile = ({ navigation }: ProfileProps) => {
     } finally {
       setLoading(false);
     }
-  };
+  },[activeProfileId]);
 
-  const fetchAllProfiles = async () => {
+  const fetchAllProfiles = useCallback(async () => {
     try {
       const response = await axiosInstance.get(API_ENDPOINTS.GET_ALL_PROFILES);
 
@@ -100,7 +100,7 @@ const Profile = ({ navigation }: ProfileProps) => {
       setAllProfiles([]);
       console.log('Error fetching profiles:', err);
     }
-  };
+  },[]);
 
   const handleDelete = () => {
     setDeleteModalVisible(true);
@@ -184,7 +184,7 @@ const Profile = ({ navigation }: ProfileProps) => {
     });
 
     return unsubscribe;
-  }, [navigation, activeProfileId]);
+  }, [navigation, activeProfileId,fetchProfileDetails, fetchAllProfiles]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -253,7 +253,7 @@ const Profile = ({ navigation }: ProfileProps) => {
                               </Text>
                             )}
                             <Text style={{
-                              fontSize: 12, color: profile.profile_type === 'business' ? '#252525' : '#252525', fontWeight: '600'
+                              fontSize: 12, color: profile.profile_type === 'business' ? '#252525' : '#252525', fontWeight: '600',
                             }}>
                               {profile.profile_type || 'Personal'}
                             </Text>
@@ -356,7 +356,7 @@ const Profile = ({ navigation }: ProfileProps) => {
                   {profileData?.is_primary && (
                     <View style={{
                       flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4,
-                      borderRadius: 6, marginTop: 4, alignSelf: 'flex-start'
+                      borderRadius: 6, marginTop: 4, alignSelf: 'flex-start',
                     }}>
                       <Text style={{ color: '#000', fontSize: 11, fontWeight: '600', marginLeft: 4 }}>
                         Primary Profile

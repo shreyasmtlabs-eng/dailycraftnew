@@ -64,7 +64,7 @@ const authState = useSelector((state: RootState) => state.auth);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [backendOtp]);
 
   const handleChange = (text: string, index: number) => {
     const onlyNum = text.replace(/[^0-9]/g, '').slice(-1);
@@ -72,8 +72,11 @@ const authState = useSelector((state: RootState) => state.auth);
     updatedOtp[index] = onlyNum;
     setOtp(updatedOtp);
 
-    if (onlyNum !== '' && index < 5) inputs.current[index + 1]?.focus();
-    if (onlyNum === '' && index > 0) inputs.current[index - 1]?.focus();
+    if (onlyNum !== '' && index < 5) {
+      inputs.current[index + 1]?.focus();
+    }
+    if (onlyNum === '' && index > 0) {inputs.current[index - 1]?.focus();
+    }
   };
 
   const handleKeyPress = (e: any, index: number) => {
@@ -217,7 +220,7 @@ dispatch(
         {otp.map((value, index) => (
           <TextInput
             key={index}
-            ref={(el) => (inputs.current[index] = el)}
+            ref={(el) => {(inputs.current[index] = el);}}
             style={[styles.otpBox, error ? { borderColor: 'red' } : null]}
             keyboardType="number-pad"
             maxLength={1}

@@ -1,5 +1,5 @@
 
-import React,{ useState, useRef, useEffect, useMemo } from 'react';
+import React,{ useState, useRef, useEffect, useMemo ,useCallback} from 'react';
 import {
   View,
   Text,
@@ -57,6 +57,7 @@ type ProfileDataType = {
   is_primary?: boolean;
 };
 
+
 type LoadTemplateType = {
   id: number;
   admin_id: number;
@@ -89,7 +90,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [initialLoading, setInitialLoading] = useState(true);
   const [reload, setReload] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
-const prevProfileId = useRef<string | null>(null);
+  const prevProfileId = useRef<string | null>(null);
+
 
 
   const filteredTemplates = useMemo(() => {
@@ -120,7 +122,7 @@ const prevProfileId = useRef<string | null>(null);
 
   const arrayBufferToBase64 = (buffer: ArrayBuffer) => Buffer.from(buffer).toString('base64');
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const response = await adminAxios.get(API_ENDPOINTS.GET_ALL_CATEGORY);
       clearNetworkError();
@@ -129,15 +131,15 @@ const prevProfileId = useRef<string | null>(null);
       }
     } catch (err) {
       handleNetworkError(err);
-      console.log('Error fetching categories:', err);
+      console.log('Error fetching categories:>>>>>', err);
     }
-  };
+  },[]);
 
-  const fetchAllProfiles = async () => {
+  const fetchAllProfiles = useCallback(async () => {
     try {
       setProfilesLoading(true);
       const response = await axiosInstance.get(API_ENDPOINTS.GET_ALL_PROFILES);
-      clearNetworkError();
+
 
       if (response.data?.status && Array.isArray(response.data.data)) {
         console.log('ALL PROFILES:>>>>>', response.data.data);
@@ -160,28 +162,30 @@ const prevProfileId = useRef<string | null>(null);
         setAllProfiles([]);
       }
     } catch (err) {
-      handleNetworkError(err);
       setAllProfiles([]);
-      console.log('Error fetching profiles:', err);
+      console.log('Error fetching profiles:>>>>>>', err);
     } finally {
       setProfilesLoading(false);
     }
-  };
+  },[activeProfileId, dispatch]);
 
-  const makeProfilePrimary = async (profileId: string) => {
+  const makeProfilePrimary = useCallback(async (profileId: string) => {
     try {
       const response = await axiosInstance.post(API_ENDPOINTS.MAKE_PRIMARY, {
-        profile_id: parseInt(profileId)
+        profile_id: parseInt(profileId,10),
       });
 
       if (response.data?.status) {
-        console.log('Profile set as primary:', profileId);
+        console.log('Profile set as primary:>>>>>', profileId);
         await fetchAllProfiles();
       }
     } catch (error) {
-      console.log('Error making profile primary:', error);
+      console.log('Error making profile primary:>>>>>', error);
     }
-  };
+  },[fetchAllProfiles]);
+
+
+
 
 
   useEffect(() => {
@@ -199,9 +203,9 @@ const prevProfileId = useRef<string | null>(null);
     if (allProfiles.length > 0) {
       ensurePrimaryProfile();
     }
-  }, [allProfiles, token]);
+  }, [allProfiles, token,makeProfilePrimary]);
 
-  const fetchProfileDetails = async (profileId?: string) => {
+  const fetchProfileDetails = useCallback(async (profileId?: string) => {
     const id = profileId || activeProfileId;
     if (!id) {
       return;
@@ -209,19 +213,17 @@ const prevProfileId = useRef<string | null>(null);
 
     try {
       const response = await axiosInstance.get(`${API_ENDPOINTS.GET_DETAILS}${id}`);
-      clearNetworkError();
       if (response.data?.status && response.data.data) {
         const newProfileData = response.data.data;
         setProfileData(newProfileData);
         setReload(prev => prev + 1);
       }
     } catch (err) {
-      handleNetworkError(err);
-      console.log('Error fetching profile details:', err);
+      console.log('Error fetching profile details:>>>>', err);
     }
-  };
+  },[activeProfileId]);
 
-  const fetchAllTemplates = async () => {
+  const fetchAllTemplates = useCallback(async () => {
     try {
       const response = await axiosInstance.get(API_ENDPOINTS.DOWNLOAD_TEMPLATE);
       if (response.data?.status && Array.isArray(response.data.data)) {
@@ -234,11 +236,11 @@ const prevProfileId = useRef<string | null>(null);
         );
       }
     } catch (err) {
-      console.log('Error fetchAllTemplates:', err);
+      console.log('Error fetchAllTemplates:>>>>', err);
     }
-  };
+  },[]);
 
-  const fetchAllTemplateImages = async () => {
+  const fetchAllTemplateImages = useCallback(async () => {
     if (!activeProfileId || filteredTemplates.length === 0) {
       return;
     }
@@ -268,17 +270,17 @@ const prevProfileId = useRef<string | null>(null);
             return newArray;
           });
         } catch (err) {
-          console.log(`Error loading template ${template.id}:`, err);
+          console.log(`Error loading template ${template.id}>>>>>:`, err);
         }
       }
     } catch (err) {
-      console.log('fetchAllTemplateImages error:', err);
+      console.log('fetchAllTemplateImages error:>>>>>>', err);
     } finally {
       setInitialLoading(false);
     }
-  };
+  },[activeProfileId, filteredTemplates]);
 
-  const fetchTemplateData = async (templateId?: number, index?: number) => {
+  const fetchTemplateData = useCallback(async (templateId?: number, index?: number) => {
     if (!templateId || typeof index !== 'number') {
       return;
     }
@@ -312,11 +314,11 @@ const prevProfileId = useRef<string | null>(null);
         return newArray;
       });
     } catch (err) {
-      console.log('fetchTemplateData error:', err);
+      console.log('fetchTemplateData error:>>>>', err);
     } finally {
       setLoadingIndex(null);
     }
-  };
+  }, [activeProfileId, renderTemplate]);
 
 
 const onRefresh = React.useCallback(async () => {
@@ -352,7 +354,7 @@ const onRefresh = React.useCallback(async () => {
     } finally {
       setRefreshing(false);
     }
-  }, []);
+  }, [fetchCategories, fetchAllProfiles, fetchAllTemplates]);
 
   useEffect(() => {
     const init = async () => {
@@ -363,35 +365,15 @@ const onRefresh = React.useCallback(async () => {
       setLoading(false);
     };
     init();
-  }, []);
-
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     if (!activeProfileId) {
-  //       return;
-  //     }
-  //     const reloadTemplates = async () => {
-  //             await fetchAllProfiles();
-  //       fetchProfileDetails(activeProfileId);
-
-  //       if (Template.length > 0) {
-  //         setRenderTemplate(prev => prev.map(t => ({ ...t, image_url: undefined })));
-
-  //         currentIndex.current = 0;
-  //         flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
-
-  //         setReload(prev => prev + 1);
-  //       }
-  //     };
-  //     reloadTemplates();
-  //   }, [activeProfileId])
-  // );
+  }, [fetchCategories, fetchAllProfiles, fetchAllTemplates]);
 
 
 useFocusEffect(
   React.useCallback(() => {
       fetchAllProfiles();
-    if (!activeProfileId) return;
+    if (!activeProfileId) {
+      return;
+    }
   fetchProfileDetails(activeProfileId);
 
     if (prevProfileId.current !== activeProfileId) {
@@ -410,7 +392,7 @@ useFocusEffect(
       setReload(prev => prev + 1);
     }
 
-  }, [activeProfileId])
+  }, [activeProfileId, fetchAllProfiles, fetchProfileDetails])
 );
 
 
@@ -419,7 +401,7 @@ useFocusEffect(
     if (filteredTemplates.length > 0 && activeProfileId && reload > 0) {
       fetchAllTemplateImages();
     }
-  }, [filteredTemplates, activeProfileId, reload]);
+  }, [filteredTemplates, activeProfileId, reload,fetchAllTemplateImages]);
 
   useEffect(() => {
     if (filteredTemplates.length > 0 && !initialLoading) {
@@ -431,7 +413,7 @@ useFocusEffect(
         }
       }
     }
-  }, [filteredTemplates, currentIndex.current, initialLoading]);
+  }, [filteredTemplates, initialLoading,renderTemplate, fetchTemplateData]);
 
   const handleDownload = async () => {
     if (filteredTemplates.length === 0) {
@@ -477,7 +459,7 @@ useFocusEffect(
     try {
       flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
     } catch (err) {
-      console.log('scrollToIndex error', err);
+      console.log('scrollToIndex error>>>>>>', err);
     }
 
     currentIndex.current = nextIndex;
@@ -569,7 +551,7 @@ useFocusEffect(
             data={categories}
             horizontal
             showsHorizontalScrollIndicator={false}
-            keyExtractor={item => item.id}
+            keyExtractor={item => item.id.toString()}
             contentContainerStyle={{ paddingHorizontal: 10, paddingVertical: 8, marginBottom: 12 }}
             renderItem={({ item }) => {
               const isActive = activeCategory === item.id;

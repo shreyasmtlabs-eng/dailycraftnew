@@ -51,7 +51,9 @@ const LoginScreen = () => {
 
   const handleMobileChange = (text: string) => {
     const numericText = text.replace(/[^0-9]/g, '');
-    if (numericText.length <= 10) setMobile(numericText);
+    if (numericText.length <= 10){
+      setMobile(numericText);
+    }
 
     if (numericText.length === 10 && !indianMobileRegex.test(numericText)) {
       setError('Please enter a valid Indian mobile number');
